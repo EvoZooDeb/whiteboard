@@ -1,9 +1,9 @@
             <html>
             <body>
             <div class="wrapper"> 
-              <form action="{{ url_for("get_coord")}}" method="post">
+              <form action="{{ url_for("submit_image_annotator")}}" method="post">
                 <h2>Test One</h2>
-		<img src="{{ url_for('get_coord', filename='IMG_20230228_141926.jpg') }}"class="image"/>
+		<img src="{{ url_for("static", filename='IMG_20230228_141926.jpg') }}"class="image"/>
 		<img src="{{ url_for('static', filename='images/IMG_20230228_141707.jpg') }}"class="image"/>
                 <p><input type=submit value=Transform></p>
               </form>

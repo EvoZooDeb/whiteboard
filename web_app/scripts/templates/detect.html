@@ -11,8 +11,8 @@
 	    <div id="loadingMessage" style="display:none"<label> Object detection, transformation and pixel analysis in progress. This could take 10-12 second per image.</label></div>
 
             <body>
-            <div class="wrapper" id = "page"> 
-              <form action="{{ url_for("get_coord")}}" method="post" onsubmit="showDiv()">
+            <div class="detect" id = "page"> 
+              <form action="{{ url_for("submit_detect")}}" method="post" onsubmit="showDiv()">
                 <h2>Test One</h2>
                 <label>
                   Original images path
