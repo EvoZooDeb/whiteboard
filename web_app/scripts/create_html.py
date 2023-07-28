@@ -9,11 +9,28 @@ import work_from_coord
 import veg_analyzer
 import os
 import datetime 
-from flask import Flask, request, render_template, redirect, send_from_directory 
+from flask import Flask, request, render_template, redirect, send_from_directory, url_for
+
 
 # Randomizáljuk a portokat? https://stackoverflow.com/questions/11125196/python-flask-open-a-webpage-in-default-browser
 url = 'http://127.0.0.1:5000/'
+annotated_points = []
+id_seq = []
+globals()["global_config_data"] = [] 
+globals()["global_seq_id_data"] = []
 # Flask constructor
+#app = Flask(__name__, static_folder = '/home/eram/python_venv/images/')
+#try:
+#    glob_orig_path
+#except NameError:
+#    var_exists = False
+#else:
+#    var_exists = True
+#
+#if var_exists == True:
+#    app = Flask(__name__, static_folder = glob_orig_path)
+#else:
+#    app = Flask(__name__)
 app = Flask(__name__)
 
 # A decorator used to tell the application
@@ -207,32 +224,132 @@ def submit_annotate():
         globals()["glob_p_gap_top"]        = p_gap_top
         globals()["glob_p_gap_side"]       = p_gap_side
         print(glob_img_list)
-        #media_folder = glob_orig_path + 'IMG_20230228_141926.jpg'
-        #print(media_folder)
-        #send_from_directory(media_folder, 'IMG_20230228_141926.jpg', as_attachment = True) 
-        return redirect("/image_annotator/")
-    
-@app.route('/image_annotator/')
-def image_annotator():
-    return render_template('image_annotator.html')
+        app.config["FILES"] = glob_img_list
+        for f in glob_img_list:
+            global_config_data.append(0)
+            global_seq_id_data.append(0)
+        return redirect(url_for("tagger"))
 
-@app.route('/image_annotator/', methods = ["POST"])
+@app.route('/tagger')
+def tagger():
+    if (app.config["HEAD"] == len(app.config["FILES"])):
+        return redirect(url_for('final'))
+    directory = app.config["IMAGES"]
+    globals()["image"] = app.config["FILES"][app.config["HEAD"]]
+    labels = app.config["LABELS"]
+    not_end   = not(app.config["HEAD"] == len(app.config["FILES"]) - 1)
+    not_first = not(app.config["HEAD"] == 0)
+    print(not_first)
+    #return render_template('asd.html')
+    return render_template('tagger.html',not_first=not_first, not_end=not_end, directory=directory, image=image, labels=labels, head=app.config["HEAD"] + 1, len=len(app.config["FILES"]))
+
+@app.route('/next')
+def next():
+    image = app.config["FILES"][app.config["HEAD"]]
+    print("HEAAD", app.config["HEAD"])
+    print("HEAAD", global_config_data)
+    global_config_data[app.config["HEAD"]] = app.config["LABELS"]
+    global_seq_id_data[app.config["HEAD"]] = id_seq
+    app.config["HEAD"] = app.config["HEAD"] + 1
+    for label in app.config["LABELS"]:
+        annotated_points.append([label["id"],label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
+    if global_config_data[app.config["HEAD"]] == 0:
+        app.config["LABELS"] = []
+        globals()["id_seq"] = []
+    else:
+        globals()["id_seq"] = global_seq_id_data[app.config["HEAD"]] 
+        app.config["LABELS"] = global_config_data[app.config["HEAD"]]
+    return redirect(url_for('tagger'))
+
+@app.route('/prev')
+def prev():
+    image = app.config["FILES"][app.config["HEAD"]]
+    app.config["HEAD"] = app.config["HEAD"] - 1
+    print("HEAAD", app.config["HEAD"])
+    # Visszaszűrni
+    print("Id", id_seq)
+    print("PREV", annotated_points)
+    globals()["id_seq"] = global_seq_id_data[app.config["HEAD"]] 
+    app.config["LABELS"] = global_config_data[app.config["HEAD"]]
+    return redirect(url_for('tagger'))
+
+@app.route("/final")
+def final():
+    return render_template('final.html')
+
+@app.route('/add/<id>')
+def add(id):
+    print("SEQ", id_seq)
+    print("EARLY_ID", id)
+    if len(app.config["LABELS"]) != 0:
+        if int(id) not in id_seq:
+            x_coord = request.args.get("x_coord")
+            y_coord = request.args.get("y_coord")
+            zoom_pos_x = request.args.get("zoom_pos_x")
+            zoom_pos_y = request.args.get("zoom_pos_y")
+            zoom_scale = request.args.get("zoom_scale")
+            name = image
+            print(x_coord, y_coord)
+            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
+            id_seq.append(int(id))
+            print("LABELS", app.config["LABELS"])
+        else:
+            # More than one coord for an ID -- > Object dragged, update coord values
+            print("WROOONG")
+            x_coord = request.args.get("x_coord")
+            y_coord = request.args.get("y_coord")
+            zoom_pos_x = request.args.get("zoom_pos_x")
+            zoom_pos_y = request.args.get("zoom_pos_y")
+            zoom_scale = request.args.get("zoom_scale")
+            app.config["LABELS"][int(id)-1]["x_coord"] = x_coord
+            app.config["LABELS"][int(id)-1]["y_coord"] = y_coord
+            app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
+            app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
+            app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
+    else:
+            x_coord = request.args.get("x_coord")
+            y_coord = request.args.get("y_coord")
+            zoom_pos_x = request.args.get("zoom_pos_x")
+            zoom_pos_y = request.args.get("zoom_pos_y")
+            zoom_scale = request.args.get("zoom_scale")
+            name = image
+            print("FIRST", x_coord, y_coord)
+            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
+            #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
+            id_seq.append(int(id))
+            print("LABELS", app.config["LABELS"])
+    return redirect(url_for('tagger'))
+
+@app.route('/remove/<id>')
+def remove(id):
+    index = int(id) - 1
+    del app.config["LABELS"][index]
+    for label in app.config["LABELS"][index:]:
+        label["id"] = str(int(label["id"]) - 1)
+    del id_seq[index]
+    for n, i in enumerate(id_seq[index:]):
+        id_seq[index + n] = id_seq[index + n] - 1
+    return redirect(url_for('tagger'))
+
+@app.route('/image/<f>')
+def get_image_2(f):
+    return send_from_directory(glob_orig_path, f)
+
+
+#@app.route('/image_annotator/', methods = ["POST"])
 # Ezt befejezni!
-def submit_image_annotator():
-    return redirect('/')
-
-#       if calibrate_coords != None:
-#           if calibrate_coords != "":
-#               return render_template("check.html")
-#           else:
-#                print("PLEASE SUPPLY PARAMS")
-#    return render_template("index.html")
+#def submit_image_annotator():
+#    return redirect('/')
 
 
-threading.Timer(1.25, lambda: webbrowser.open(url)).start()
+threading.Timer(1, lambda: webbrowser.open(url)).start()
 if __name__=='__main__':
 # In background
 #   threading.Thread(target = app.run).start() 
+    app.config["IMAGES"] = 'images'
+    app.config["LABELS"] = []
+    app.config["HEAD"] = 0
+    app.config["OUT"] = "out.csv"
     app.run()
 
 
