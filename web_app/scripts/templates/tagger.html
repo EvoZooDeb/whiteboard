@@ -71,7 +71,19 @@
   max-width: 100%;
   } */
 </style>
+<script>
+	function showDiv() {
+	      console.log("ASD");
+	      document.getElementById('Submit').style.display = "none";
+	      document.getElementById("page").style.display = "none";
+	      document.getElementById('loadingGif').style.display = "block";
+	      document.getElementById('loadingMessage').style.display = "block";
+	}
+</script>
+<div id="loadingGif" style="display:none"><img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"></div>
+<div id="loadingMessage" style="display:none"<label> Transformation and pixel analysis in progress. This could take 2-4 second per image.</label></div>
 <body>
+<div class="wrapper" id = "page"> 
 <nav id="sidebar" class="sidebar">
   <div class="panel panel-default" style="height:100%;">
       <div class="panel-heading">
@@ -117,15 +129,18 @@
         <span class="glyphicon glyphicon-arrow-right"></span>
       </a>
     {% else %}
-      <a href="/final" class="btn btn-primary" style="float:right; font-size:18px;" type="button">
-        <span class="glyphicon glyphicon-ok"></span>
-      </a>
+    <!--  <a href="/final" class="btn btn-primary" style="float:right; font-size:18px;" type="submit"> -->
+    <form action="{{ url_for("submit_annotation")}}" method="post" onsubmit= "showDiv()" >
+      <input class="btn btn-primary" style="float:right; font-size:18px;" type="submit" id = "Submit">
+    </form>
+	<!-- </a> -->
     {% endif %}
     </div>
     <div id = "content-image" class = "content-image">
-	    <canvas id="canvas" class = "bowl" style="width:100%; height:100% margin: 0; padding: 0;">
+	<canvas id="canvas" class = "bowl" style="width:100%; height:100% margin: 0; padding: 0;">
     	</canvas> 
     </div>
+</div>
 </div>
 <!--    <div class="col-12 col-lg-8">
     	<div class="ratio ratio-4x3 rounded bg-secondary overflow-hidden">
@@ -153,6 +168,7 @@
       ctx.drawImage(image, 0, 0);
       for (i = 0; i < labels.length; i++){
             drawLabels(Math.round(labels[i].x_coord), Math.round(labels[i].y_coord));
+            //drawLabels(labels[i].x_coord, labels[i].y_coord);
             circles.push({
 		id: labels[i].id,    
                 x: labels[i].x_coord,
@@ -247,6 +263,8 @@
     	let height = image.height;
     	complexX_scaled = Math.round(complexX * width)
     	complexY_scaled = Math.round(complexY * height)
+    //	complexX_scaled = complexX * width
+    //	complexY_scaled = complexY * height
     	lastX = complexX_scaled
     	lastY = complexY_scaled
 	console.log(lastX);
@@ -384,6 +402,8 @@
     	let height = image.height;
     	complexX_scaled = Math.round(complexX * width)
     	complexY_scaled = Math.round(complexY * height)
+    	//complexX_scaled = complexX * width
+    	//complexY_scaled = complexY * heigt
     	mouseX = complexX_scaled
     	mouseY = complexY_scaled
     
@@ -483,7 +503,7 @@
 	console.log(pos);
 	console.log(scale);
         
-        const max_scale = 4;
+        const max_scale = 5;
         const min_scale = 1;
         scale = Math.max(min_scale, Math.min(max_scale, scale));
    

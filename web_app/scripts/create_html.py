@@ -8,14 +8,15 @@ import detect_and_transform
 import work_from_coord
 import veg_analyzer
 import os
-import datetime 
+import datetime
+import pandas as pd
 from flask import Flask, request, render_template, redirect, send_from_directory, url_for
 
 
 # Randomizáljuk a portokat? https://stackoverflow.com/questions/11125196/python-flask-open-a-webpage-in-default-browser
 url = 'http://127.0.0.1:5000/'
-annotated_points = []
-id_seq = []
+globals()["annotated_points"] = []
+globals()["id_seq"] = []
 globals()["global_config_data"] = [] 
 globals()["global_seq_id_data"] = []
 # Flask constructor
@@ -111,7 +112,6 @@ def calibrate():
 def submit_calibrate():
 # Ezt ellenőrizni
     #calibrate_coords = request.form.get("Calibrate")
-    print(glob_p_gap_side)
     return redirect('/')
 
 @app.route('/csv/')
@@ -157,7 +157,8 @@ def submit_csv():
         globals()["glob_colname_x"]  = colname_x
         globals()["glob_colname_y"]  = colname_y
         globals()["glob_colname_img"]  = colname_img
-        #work_from_coord.work_from_coord(glob_orig_path, glob_coord_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, glob_sep, glob_header, glob_colname_x, glob_colname_y, glob_colname_img)
+        transformation_errors = work_from_coord.work_from_coord(glob_orig_path, glob_coord_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, glob_sep, glob_header, glob_colname_x, glob_colname_y, glob_colname_img)
+        print("ASSSSSSD", transformation_errors)
         globals()["transform"] = True
         #veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
         globals()["analyze"] = True
@@ -189,8 +190,20 @@ def submit_csv():
         
         # close the file
         f.close()
-        return render_template("final.html")
-    
+    # Create report of transformation and analysis results.
+        f = open(glob_project_dir_path + "results/report.txt", 'w')
+        if len(transformation_errors) != 0:
+            for img, count in transformation_errors:
+                print(img, count)
+                line_text = "Count error: The provided number of keypoints on image: {} is {} (expected 12). \n".format(img, str(count))
+                f.write(line_text)
+        else:
+            line_text = "Transformation success: The provided number of keypoints on all images are the same as expected (12)."
+            f.write(line_text)
+        f.close()
+
+    return redirect(url_for('final'))
+
 @app.route('/annotate/')
 def annotate():
     return render_template('annotate.html')
@@ -223,6 +236,7 @@ def submit_annotate():
         globals()["glob_b_gap_side"]       = b_gap_side
         globals()["glob_p_gap_top"]        = p_gap_top
         globals()["glob_p_gap_side"]       = p_gap_side
+        globals()["glob_save_images"]      = save_images
         print(glob_img_list)
         app.config["FILES"] = glob_img_list
         for f in glob_img_list:
@@ -240,19 +254,19 @@ def tagger():
     not_end   = not(app.config["HEAD"] == len(app.config["FILES"]) - 1)
     not_first = not(app.config["HEAD"] == 0)
     print(not_first)
-    #return render_template('asd.html')
     return render_template('tagger.html',not_first=not_first, not_end=not_end, directory=directory, image=image, labels=labels, head=app.config["HEAD"] + 1, len=len(app.config["FILES"]))
 
 @app.route('/next')
 def next():
     image = app.config["FILES"][app.config["HEAD"]]
-    print("HEAAD", app.config["HEAD"])
-    print("HEAAD", global_config_data)
     global_config_data[app.config["HEAD"]] = app.config["LABELS"]
     global_seq_id_data[app.config["HEAD"]] = id_seq
     app.config["HEAD"] = app.config["HEAD"] + 1
+    globals()["label_count"] = 0
     for label in app.config["LABELS"]:
-        annotated_points.append([label["id"],label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
+        #annotated_points.append([label["id"],label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
+        globals()["annotated_points"].append([label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
+        globals()["label_count"] = globals()["label_count"] + 1
     if global_config_data[app.config["HEAD"]] == 0:
         app.config["LABELS"] = []
         globals()["id_seq"] = []
@@ -265,17 +279,12 @@ def next():
 def prev():
     image = app.config["FILES"][app.config["HEAD"]]
     app.config["HEAD"] = app.config["HEAD"] - 1
-    print("HEAAD", app.config["HEAD"])
     # Visszaszűrni
-    print("Id", id_seq)
-    print("PREV", annotated_points)
+    globals()["annotated_points"] = globals()["annotated_points"][:len(globals()["annotated_points"]) - globals()["label_count"]]
+    print("ANN POINTS", len(annotated_points), globals()["label_count"],"PTS", annotated_points)
     globals()["id_seq"] = global_seq_id_data[app.config["HEAD"]] 
     app.config["LABELS"] = global_config_data[app.config["HEAD"]]
     return redirect(url_for('tagger'))
-
-@app.route("/final")
-def final():
-    return render_template('final.html')
 
 @app.route('/add/<id>')
 def add(id):
@@ -289,13 +298,11 @@ def add(id):
             zoom_pos_y = request.args.get("zoom_pos_y")
             zoom_scale = request.args.get("zoom_scale")
             name = image
-            print(x_coord, y_coord)
             app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
             id_seq.append(int(id))
             print("LABELS", app.config["LABELS"])
         else:
             # More than one coord for an ID -- > Object dragged, update coord values
-            print("WROOONG")
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
             zoom_pos_x = request.args.get("zoom_pos_x")
@@ -335,11 +342,71 @@ def remove(id):
 def get_image_2(f):
     return send_from_directory(glob_orig_path, f)
 
+@app.route('/tagger/', methods = ["POST"])
+def submit_annotation():
+    for label in app.config["LABELS"]:
+        annotated_points.append([label["name"],float(label["x_coord"]), float(label["y_coord"])])
+    annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
+    transformation_errors = work_from_coord.work_from_coord(glob_orig_path, 0, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, 0, 0, "x_coord", "y_coord", "name", "data_frame", annotated_points_dataframe)
+    print("ERRORS", transformation_errors)
+    globals()["transform"] = True
+    veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
+    globals()["analyze"] = True
+    if glob_save_images == "on":
+        pass
+    else:
+        transformation_dir = glob_project_dir_path + "images/transformed_images"
+        for f in os.listdir(transformation_dir):
+            os.remove(os.path.join(transformation_dir, f))
+        results_dir = glob_project_dir_path + "images/result_images"
+        for f in os.listdir(results_dir):
+            os.remove(os.path.join(results_dir, f))
+    # to open/create a new html file in the write mode
+    f = open('templates/final.html', 'w')
+    html_template = """
+     <html>
+    <body>
+    <div class="wrapper"> 
+        <h2>Success the results are in {}</h2>
+        <button onClick="window.location.href='http://127.0.0.1:5000/'">Home</button>
+    </div>
+    </html>
+    </body>
+    </html>
+    """.format(glob_project_dir_path + "results/")
+    
+    # writing the code into the file
+    f.write(html_template)
+    
+    # close the file
+    f.close()
+   
+    # Create report of transformation and analysis results.
+    f = open(glob_project_dir_path + "results/report.txt", 'w')
+    if len(transformation_errors) != 0:
+        for img, count in transformation_errors:
+            print(img, count)
+            line_text = "Count error: The provided number of keypoints on image: {} is {} (expected 12). \n".format(img, str(count))
+            f.write(line_text)
+    else:
+        line_text = "Transformation success: The provided number of keypoints on all images are the same as expected (12)."
+        f.write(line_text)
+    f.close()
 
-#@app.route('/image_annotator/', methods = ["POST"])
-# Ezt befejezni!
-#def submit_image_annotator():
-#    return redirect('/')
+    return redirect(url_for('final'))
+
+@app.route('/final')
+def final():
+    app.config["IMAGES"] = 'images'
+    app.config["LABELS"] = []
+    app.config["HEAD"] = 0
+    app.config["FILES"] = []
+    globals()["annotated_points"] = []
+    #annotated_points_dataframe = []
+    globals()["id_seq"] = []
+    globals()["global_config_data"] = [] 
+    globals()["global_seq_id_data"] = []
+    return render_template("final.html")
 
 
 threading.Timer(1, lambda: webbrowser.open(url)).start()
@@ -349,7 +416,6 @@ if __name__=='__main__':
     app.config["IMAGES"] = 'images'
     app.config["LABELS"] = []
     app.config["HEAD"] = 0
-    app.config["OUT"] = "out.csv"
     app.run()
 
 
