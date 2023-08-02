@@ -10,6 +10,22 @@ from itertools import combinations
 def manhattan(a, b):
     return sum(abs(val1-val2+val1/10000) for val1, val2 in zip(a,b))
 
+# Create a function that calculates sidelength of all rectangles and determine average of them as "theoretical value". Used for calibration.
+def calc_average_side_length(points):
+    r_vert_l_left  = manhattan(points[0], points[2])
+    r_vert_l_right = manhattan(points[1], points[3])
+    r_hor_l_up     = manhattan(points[0], points[1])
+    r_hor_l_bot    = manhattan(points[2], points[3])
+    b_vert_l_left  = manhattan(points[4], points[6])
+    b_vert_l_right = manhattan(points[5], points[7])
+    b_hor_l_up     = manhattan(points[4], points[5])
+    b_hor_l_bot    = manhattan(points[6], points[7])
+    p_vert_l_left  = manhattan(points[8], points[10])
+    p_vert_l_right = manhattan(points[9], points[11])
+    p_hor_l_up     = manhattan(points[8], points[9])
+    p_hor_l_bot    = manhattan(points[10], points[11])
+    return (r_vert_l_left + r_vert_l_right + r_hor_l_up + r_hor_l_bot + b_vert_l_left + b_vert_l_right + b_hor_l_up + b_hor_l_bot + p_vert_l_left + p_vert_l_right + p_hor_l_up + p_hor_l_bot) / 12
+
 # Create a function to calculate closest value 
 def closest_value(input_list, input_value):
     arr = np.asarray(input_list) 
@@ -158,12 +174,10 @@ def determine_theoretical_lengths_and_angles(colors):
         globals()["hor_angles"        ] = [globals()["angle_" + colors[0] + "_hor"]]
         globals()[colors[0] + "_index"] = 0
 # Define base params
-# Low res:
-    #globals()["theoretical_length"                ] = 60
-    #globals()["moe"                               ] = 0.15 * theoretical_length
-# High res:
-    globals()["theoretical_length"                ] = 170
-    globals()["moe"                               ] = 0.085 * theoretical_length
+    globals()["theoretical_length"                ] = average_side_length
+    globals()["theoretical_length_slope"          ] = (0.085-0.15)/(170-60)
+    globals()["theoretical_length_multiplier"     ] = (average_side_length - 60) * theoretical_length_slope + 0.15 
+    globals()["moe"                               ] = theoretical_length_multiplier * theoretical_length
     globals()["theoretical_angle"                 ] = 90
     globals()["theoretical_angle_rad"             ] = -theoretical_angle * math.pi / 180
     globals()["theoretical_angle_hor"             ] = 0
@@ -518,12 +532,13 @@ def isRect(points, threshold, h, w):
     return False
 
 ### Detect keypoints and transform images
-def detect_and_transform(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15):
+def detect_and_transform(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15, average_side_length = 170):
     crop_output           = project_dir + 'images/cropped_images/'  ## output containing crop results
     edge_detection_output = project_dir + 'images/edge_detected_images/'
     transform_output      = project_dir + 'images/transformed_images/'
     original_image_input  = orig_path
     cut_coord_path        = project_dir + 'results/cut_coords.csv'
+    globals()["average_side_length"] = average_side_length
     c_coords = pd.read_csv(cut_coord_path, sep = ";", header = None, index_col = 0, squeeze = True).to_dict()
     board_height  = float(board_height) # in cm
     board_width   = float(board_width)  # in cm
@@ -537,6 +552,9 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
     p_gap_top     = float(p_gap_top) * 10  # in cm
     p_gap_side    = float(p_gap_side) * 10 # in cm
     table_shape   = [round(new_w), round(new_h)]
+    image_errors             = []
+    image_warnings           = []
+    config                   = []
 
     for file in os.listdir(crop_output):
         #file = "PA042208.JPG"
@@ -918,6 +936,8 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             new_points.append([r_gap_side + rect_l, r_gap_top + 0])
             new_points.append([r_gap_side, r_gap_top + rect_l])
             new_points.append([r_gap_side + rect_l, r_gap_top + rect_l])
+        else:
+            image_warnings.append([file, "red"])
         if final_coord_b != None and safe_corners_b != [0,0]:
             image = cv2.line(image, (round(final_coord_b[0][0]), round(final_coord_b[0][1])), (round(final_coord_b[1][0]), round(final_coord_b[1][1])), (0,255,255), 1)
             image = cv2.line(image, (round(final_coord_b[0][0]), round(final_coord_b[0][1])), (round(final_coord_b[2][0]), round(final_coord_b[2][1])), (0,255,255), 1)
@@ -939,6 +959,8 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             new_points.append([table_shape[0] - b_gap_side, b_gap_top + 0])
             new_points.append([table_shape[0] - b_gap_side - rect_l, b_gap_top + rect_l])
             new_points.append([table_shape[0] - b_gap_side, b_gap_top + rect_l])
+        else:
+            image_warnings.append([file, "blue"])
         if final_coord_p != None and safe_corners_p != [0,0]:
             image = cv2.line(image, (round(final_coord_p[0][0]), round(final_coord_p[0][1])), (round(final_coord_p[1][0]), round(final_coord_p[1][1])), (0,255,255), 1)
             image = cv2.line(image, (round(final_coord_p[0][0]), round(final_coord_p[0][1])), (round(final_coord_p[2][0]), round(final_coord_p[2][1])), (0,255,255), 1)
@@ -960,6 +982,8 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             new_points.append([p_gap_side + rect_l, p_gap_top])
             new_points.append([p_gap_side, p_gap_top + rect_l])
             new_points.append([p_gap_side + rect_l, p_gap_top + rect_l])
+        else:
+            image_warnings.append([file, "purple"])
         
     
         # Perspective transformation
@@ -967,9 +991,12 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         old_points = np.array(old_points)
         new_points = np.array(new_points)
         if old_points != []:
+            for n,i in enumerate(old_points):
+                config.append({"id": str(n+1), "name":file, "x_coord":str(round(i[0])), "y_coord":str(round(i[1])), "zoom_pos_x": '0',"zoom_pos_y":  '0', "zoom_scale": '1'})
             M, mask = cv2.findHomography(old_points.astype(np.float32), new_points.astype(np.float32))
             orig_image = cv2.warpPerspective(orig_image, M, table_shape)
         else:
+            image_errors.append(file)
             print(file + "Not enough point of reference")
     
     #    # Save results
@@ -987,8 +1014,10 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         cv2.destroyAllWindows()
     print("Edge detection results saved to:" + edge_detection_output)
     print("Perspective transformation results saved to:" + transform_output)
+    return image_errors, image_warnings, config
 
 #(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15):
 if __name__ == '__main__':
     detect_and_transform("/home/eram/python_venv/images/original_images/", "/home/eram/python_venv/")
+
 

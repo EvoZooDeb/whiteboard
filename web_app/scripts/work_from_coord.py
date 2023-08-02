@@ -56,6 +56,8 @@ def transform_by_coord(file_path, sep, header, x, y, label, image_name, old_poin
         old_points.append([p_top_right[1], p_top_right[2]])
         old_points.append([p_bot_left[1], p_bot_left[2]])
         old_points.append([p_bot_right[1], p_bot_right[2]])
+        print("ASD----------------------------------------------")
+        #return r_top_left, r_top_right, r_bot_left, r_bot_right, b_top_left, b_top_right, b_bot_left, b_bot_right, p_top_left, p_top_right, p_bot_left, p_bot_right
     else:
         error_images.append([image_name, nrow_corners]) 
 

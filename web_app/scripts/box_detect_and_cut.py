@@ -12,7 +12,7 @@ import math
 import csv
 
 ### Detection on images
-def detection_on_image(image_path,output_full_path):
+def detection_on_image(image_path,output_full_path, error_images):
         image                 = cv2.imread(image_path)
         draw                  = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image                 = preprocess_image(image)
@@ -23,7 +23,7 @@ def detection_on_image(image_path,output_full_path):
         boxes /= scale
         if np.all(scores[0] < min_score):
             print(file, ": NO BOX")
-            outlier_images.append(file)
+            error_images.append(file)
             new_boxes.append(np.array([0,0,0,0]))
         else:    
            for box, score, label in zip(boxes[0], scores[0], labels[0]):
@@ -55,25 +55,25 @@ def detect_and_cut(orig_path, project_dir):
     output_path = project_dir + 'images/box_images/'
     crop_output = project_dir + 'images/cropped_images/'            ## output containing crop results
     box_coords_path       = project_dir + 'results/box_coords.csv'    ## your path to the csv file containing box coordinates
-    outlier_images_path   = project_dir + 'results/outlier_names.csv' ## your path to the csv file containing outlier (no detection) image names
+    #outlier_images_path   = project_dir + 'results/outlier_names.csv' ## your path to the csv file containing outlier (no detection) image names
     cut_coords_path       = project_dir + 'results/cut_coords.csv'    ## your path to the csv file containing cut coordinates
     height_to_width_ratio = 0.70
     image_names           = []
-    outlier_images        = []
+    error_images        = []
     coords                = []
 
 ### RUN DETECTION ON ALL IMAGES IN THE INPUT FOLDER
     for file in os.listdir(input_path):
         input_full_path  = os.path.join(input_path,file)
         output_full_path = os.path.join(output_path,file)
-        detection_on_image(input_full_path,output_full_path)
+        detection_on_image(input_full_path,output_full_path, error_images)
     print("Box detection results saved to:" + output_path)
     np.savetxt(box_coords_path, new_boxes, delimiter=',')  ### SAVE COORDS TO CSV
     print("Box coordinates saved to:", box_coords_path)
-    with open(outlier_images_path, 'w') as f_0:
-        for i in outlier_images:
-            f_0.write("%s\n"% i)
-    print("List of images without detected box saved to:", outlier_images_path)
+   # with open(outlier_images_path, 'w') as f_0:
+   #     for i in outlier_images:
+   #         f_0.write("%s\n"% i)
+   # print("List of images without detected box saved to:", outlier_images_path)
 
 ### CUT OUT THE TABLES ACCORDING TO THE BOX COORDINATES
     for file in enumerate(os.listdir(input_path)):
@@ -119,6 +119,7 @@ def detect_and_cut(orig_path, project_dir):
     
     print("Image cropping results saved to:" + crop_output)
     print("Cut coordinates saved to:", cut_coords_path)
+    return error_images
 
 if __name__ == '__main__':
     detect_and_cut("/home/eram/python_venv/images/original_images/", "/home/eram/python_venv/")

@@ -37,6 +37,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     analyze_output   = project_dir + 'images/result_images/'
     image_names_2 = []
     str_data = []
+    error_images = []
     orig_table_height = float(board_height)
     orig_table_width  = float(board_width)
     rect_l  = float(rect_l)
@@ -282,6 +283,9 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         nrow_all = veg_str_df.shape[0]
         # Calculate leaf-area
         la = nrow_1/nrow_all*(orig_table_width - narrowing_cm * 2)*(orig_table_height - shortening_cm)
+        if math.isnan(la):
+            la = 0 
+            error_images.append([file, "leaf area (la)"])
         print("LA:", la)
         target_area = (orig_table_width - narrowing_cm * 2) * (orig_table_height - shortening_cm)
         coverage_percent = la / target_area *100
@@ -292,25 +296,36 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         vor_df['value'] = vor_df['value'] /nrow_max
         hcv = vor_df['y'][vor_df['value'] > 0.95].max()
         if math.isnan(hcv):
-            hcv = 0 
+            #hcv = 0 
+            error_images.append([file, "height of closed vegetation (hcv)"])
         print("HCV:", hcv)
         mhc = vor_df['y'][vor_df['value'] > 0].max()
+        if math.isnan(mhc):
+            #mhc = 0 
+            error_images.append([file, "maximum height of vegetation (mhc)"])
         print("MHC:", mhc)
         vor = (hcv + mhc) / 2
+        if math.isnan(vor):
+            #vor = 0 
+            error_images.append([file, "visual obstruction readings (vor)"])
         print("VOR:", vor)
         fhd = skbio_shannon(vor_df['value'], 2)
+        if math.isnan(fhd):
+            #fhd = 0 
+            error_images.append([file, "foliage height diversity (fhd)"])
         print("FHD:", fhd)
         str_data.append([file, la, coverage_percent,hcv,  mhc, vor, fhd])
         
         # Draw lines at HCV and MHC
-        hcv_pix = h-(hcv * h)/(orig_table_height - shortening_cm)
-        mhc_pix = h-( mhc * h)/ (orig_table_height - shortening_cm)
-        if math.isnan(hcv_pix):
-            hcv_pix = h
-        if math.isnan(mhc_pix):
-            mhc_pix = h
-        orig_image_cut  = cv2.line(orig_image_cut,(0, int(hcv_pix)), (int(w), int(hcv_pix)), (0, 0, 255) ,3) # HCV
-        orig_image_cut  = cv2.line(orig_image_cut,(0, int(mhc_pix)), (int(w), int(mhc_pix)), (255, 0, 255), 3) # MHC
+        if not math.isnan(hcv) and  not math.isnan(mhc):
+            hcv_pix = h-(hcv * h)/(orig_table_height - shortening_cm)
+            mhc_pix = h-( mhc * h)/ (orig_table_height - shortening_cm)
+            if math.isnan(hcv_pix):
+                hcv_pix = h
+            if math.isnan(mhc_pix):
+                mhc_pix = h
+            orig_image_cut  = cv2.line(orig_image_cut,(0, int(hcv_pix)), (int(w), int(hcv_pix)), (0, 0, 255) ,3) # HCV
+            orig_image_cut  = cv2.line(orig_image_cut,(0, int(mhc_pix)), (int(w), int(mhc_pix)), (255, 0, 255), 3) # MHC
     
         print(file, "DONE!")
         analyze_full_output = os.path.join(analyze_output, file)
@@ -322,6 +337,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     # Save veg_str results
     str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhc', 'vor', 'fhd'])
     str_df.to_csv((project_dir + "results/veg_str_22.csv"), sep = ',', encoding = 'utf-8')
+    return error_images
 
 #pixel_analyse(project_dir, board_height = 105, board_width = 35, rect_l):
 if __name__ == '__main__':
