@@ -629,7 +629,7 @@ def prev():
     app.config["LABELS"] = global_config_data[app.config["HEAD"]]
     return redirect(url_for('tagger'))
 
-@app.route('/add/<id>')
+@app.route('/add/<id>', methods=['GET', 'POST'])
 def add(id):
     print("SEQ", id_seq)
     print("EARLY_ID", id)
@@ -637,38 +637,40 @@ def add(id):
         if int(id) not in id_seq:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
-            zoom_pos_x = request.args.get("zoom_pos_x")
-            zoom_pos_y = request.args.get("zoom_pos_y")
-            zoom_scale = request.args.get("zoom_scale")
+            #zoom_pos_x = request.args.get("zoom_pos_x")
+            #zoom_pos_y = request.args.get("zoom_pos_y")
+            #zoom_scale = request.args.get("zoom_scale")
             name = image
-            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
+            #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
+            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
             print("LABELS", app.config["LABELS"])
         else:
             # More than one coord for an ID -- > Object dragged, update coord values
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
-            zoom_pos_x = request.args.get("zoom_pos_x")
-            zoom_pos_y = request.args.get("zoom_pos_y")
-            zoom_scale = request.args.get("zoom_scale")
+            #zoom_pos_x = request.args.get("zoom_pos_x")
+            #zoom_pos_y = request.args.get("zoom_pos_y")
+            #zoom_scale = request.args.get("zoom_scale")
             app.config["LABELS"][int(id)-1]["x_coord"] = x_coord
             app.config["LABELS"][int(id)-1]["y_coord"] = y_coord
-            app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
-            app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
-            app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
+            #app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
+            #app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
+            #app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
     else:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
-            zoom_pos_x = request.args.get("zoom_pos_x")
-            zoom_pos_y = request.args.get("zoom_pos_y")
-            zoom_scale = request.args.get("zoom_scale")
+            #zoom_pos_x = request.args.get("zoom_pos_x")
+            #zoom_pos_y = request.args.get("zoom_pos_y")
+            #zoom_scale = request.args.get("zoom_scale")
             name = image
             print("FIRST", x_coord, y_coord)
-            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
-            #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
+            #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
+            app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
             print("LABELS", app.config["LABELS"])
-    return redirect(url_for('tagger'))
+    #return redirect(url_for('tagger'))
+    return ('', 204)
 
 @app.route('/remove/<id>')
 def remove(id):
@@ -679,7 +681,8 @@ def remove(id):
     del id_seq[index]
     for n, i in enumerate(id_seq[index:]):
         id_seq[index + n] = id_seq[index + n] - 1
-    return redirect(url_for('tagger'))
+    #return redirect(url_for('tagger'))
+    return redirect('', 204)
 
 @app.route('/image/<f>')
 def get_image_2(f):
