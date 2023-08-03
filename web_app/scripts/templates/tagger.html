@@ -57,7 +57,7 @@
      background-position:center;
      background-size: 50% 2px,2px 50%; /*thickness = 2px, length = 50% (25px)*/
      background-repeat:no-repeat;
-  }
+  } 
   .bowl {
   width: 100%;
   height: 100%;
@@ -201,7 +201,6 @@
     var lastX;
     var lastY;
     
-
     var drawLabels = function(x_coord, y_coord){
   	    ctx.strokeStyle = "orange";
             ctx.lineWidth="6";
@@ -220,7 +219,6 @@
 
     var removeID = function(id){
 	hit = id - 1
-	
 	$.ajax({
 		type: "GET",
 		url: "/remove/" + id,

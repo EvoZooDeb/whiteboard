@@ -61,7 +61,7 @@
   .bowl {
   width: 100%;
   height: 100%;
-  transition: transform .0s;
+  transition: transform .3s;
   transform-origin: 0 0;
   }
 
@@ -89,28 +89,18 @@
       <div class="panel-heading">
         <h3 class="panel-title"><b><center>Coordinates</center></b></h3>
       </div>
-   <!--   <script>
-        var label = function(id, name) {
-          window.location.replace("/label/" + id + "?name=" + name);
-        }
-   </script> -->
         <div class="panel-body">
             <div class="list-group">
-              {% for label in labels %}
+           <!--   {% for label in labels %}
                 <div class="list-group-item">
                     <div class="input-group">
                         <span class="input-group-addon" id="id">{{ label.id }}</span>
-			<!-- {% if label.name %} -->
 			<text style="background-color:#E5E7E9;" class="form-control custom-control" style="resize:none">{{ label.x_coord }}, {{label.y_coord}}</text>
-                       <!-- {% else %}
-                            <input id= "{{ label.id }}" onkeydown="if (event.keyCode == 13) { label(this.id, this.value); }" type="text" class="form-control" placeholder="Label Name" autofocus></input>
-			    {% endif %} -->
-                        <span class="input-group-btn">
                             <button id= "{{ label.id }}" class="btn btn-danger" onclick="window.location.replace('/remove_results/' + this.id)" type="button"><b>-<b></button>
                         </span>
                     </div>
                 </div>
-                {% endfor %}
+		{% endfor %} -->
             </div>
         </div>
     </div>
@@ -168,6 +158,7 @@
       ctx.drawImage(image, 0, 0);
       for (i = 0; i < labels.length; i++){
             drawLabels(Math.round(labels[i].x_coord), Math.round(labels[i].y_coord));
+            createElement(labels[i].id, Math.round(labels[i].x_coord), Math.round(labels[i].y_coord));
             //drawLabels(labels[i].x_coord, labels[i].y_coord);
             circles.push({
 		id: labels[i].id,    
@@ -216,6 +207,56 @@
 	    ctx.lineTo(x_coord - 25, y_coord);
             ctx.closePath();
             ctx.stroke();
+    }
+
+    var removeID = function(id){
+    	hit = id - 1
+    
+    	$.ajax({
+    		type: "GET",
+    		url: "/remove_results/" + id,
+    		success: function(){
+    			$("#s_" + id).remove()
+    			var fields = $(".list-group-item");
+    			var count = 1;
+    			$.each(fields, function() {
+    			    $(this).attr('id','s_' + count);
+    			    count++;
+    			});
+    			var fields = $(".btn-danger");
+    			var count = 1;
+    			$.each(fields, function() {
+    			    $(this).attr('id',count);
+    			    count++;
+    			});
+    			var fields = $(".input-group-addon");
+    			var count = 1;
+    			$.each(fields, function() {
+    			    $(this).text(count);
+    			    count++;
+    			});
+    		}
+    	    });
+    	circles.splice(hit, 1)
+   	for (var i = hit; i < circles.length; i++) {
+    		var circle = circles[i];
+        	circle.id = circle.id - 1
+    	}
+	labels.length = labels.length - 1
+	drawAll()
+    }
+    
+    var createElement = function(id, x_coord, y_coord) {
+    	html = '<div class="list-group-item" id="s_'+id+'">' + 
+    	       	'<div class="input-group">' +
+    	    		'<span class="input-group-addon">'+id+'</span>' +
+    	   		'<text style="background-color:#E5E7E9;" id="c_'+id+'" class="form-control custom-control" style="resize:none"> X: '+x_coord+' Y: '+y_coord+'</text>' +
+    	    		'<span class="input-group-btn" >' +
+    	   			'<button id= "'+id+'" class="btn btn-danger" onclick=removeID(this.id) type="button"><b>-<b></button>' +
+    	   		'</span>' +
+    	   	'</div>' +
+    	       '</div>';
+    	$(".list-group").append(html)
     }
     // clear the canvas and redraw all existing circles
     function drawAll() {
@@ -288,7 +329,7 @@
 	   	//pass	
            } else {
 	       c_id = circles[hit].id;
-               window.location.replace("/remove_results/" + c_id);
+	       removeID(c_id) 
            }
 	// if control key is up
 	} else {
@@ -296,18 +337,32 @@
            // if hit then set the isDown flag to start a drag
            if (hit < 0) {
                circles.push({
+		   id: labels.length + 1,
                    x: lastX,
                    y: lastY,
-	   	radius: stdRadius
+	   	   radius: stdRadius
                });
-	     console.log("POSSCALE");  
-	     console.log(pos, scale);  
-             window.location.replace("/add_results/" + (labels.length + 1) +
+	     f_id = labels.length + 1
+	     html = '<div class="list-group-item" id="s_'+f_id+'">' + 
+		    	'<div class="input-group">' +
+		 		'<span class="input-group-addon">'+f_id+'</span>' +
+				'<text style="background-color:#E5E7E9;" id="c_'+f_id+'" class="form-control custom-control" style="resize:none"> X: '+lastX+' Y: '+lastY+'</text>' +
+		 		'<span class="input-group-btn" >' +
+					'<button id= "'+f_id+'" class="btn btn-danger" onclick=removeID(this.id) type="button"><b>-<b></button>' +
+				'</span>' +
+			'</div>' +
+		    '</div>';
+	     $.ajax({
+	     	type: "GET",
+	     	url: "/add_results/" + f_id +
                     "?x_coord=" + lastX +
-                    "&y_coord=" + lastY +
-	       	    "&zoom_pos_x=" + pos.x +
-	            "&zoom_pos_y=" + pos.y +
-		    "&zoom_scale=" + scale);
+                    "&y_coord=" + lastY, 
+		success: function() {
+			$(".list-group").append(html)
+   		 }
+		});
+             drawLabels(Math.round(lastX), Math.round(lastY));
+	     labels.length = labels.length + 1
            } else {
                draggingCircle = circles[hit];
 	       c_id = circles[hit].id;
@@ -371,12 +426,18 @@
 	if (draggingCircle != -1){
 	console.log("ID");
 	console.log(c_id);
-        window.location.replace("/add_results/" + c_id +
-               "?x_coord=" + draggingCircle.x +
-               "&y_coord=" + draggingCircle.y+
-	       "&zoom_pos_x=" + pos.x +
-	       "&zoom_pos_y=" + pos.y +
-	       "&zoom_scale=" + scale);
+	x_coord = draggingCircle.x
+	y_coord = draggingCircle.y
+	$.ajax({
+		type: "GET",
+		url: "/add_results/" + c_id +
+               "?x_coord=" + x_coord +
+               "&y_coord=" + y_coord,
+		success: function() {
+			$("#c_" + c_id).text("X:" + x_coord + "Y:" + y_coord);
+   		 }
+	});
+	draggingCircle = -1
 	}
     }
     
@@ -467,26 +528,26 @@
      w: image_z.offsetWidth, 
      h: image_z.offsetHeight 
    };
-   if (labels.length > 0){
-   	pos = { x: 0, y: 0 };
-	pos.x = Number(labels[labels.length-1].zoom_pos_x);
-	pos.y = Number(labels[labels.length-1].zoom_pos_y);
-   	target = { x: 0, y: 0 };
-   	pointer = { x: 0, y: 0 };
-	scale = Number(labels[labels.length-1].zoom_scale);
-	console.log("POSSCALE_SEC");
-	console.log(pos);
-	console.log(scale);
-   	image_z.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale},${scale})`;
-   } else{
- 	console.log("ZEROLABEL");
- 	pos = { x: 0, y: 0 };
- 	console.log("POSSCALE_ZERO");
- 	console.log(pos);
- 	target = { x: 0, y: 0 };
- 	pointer = { x: 0, y: 0 };
- 	scale = 1;
-   };
+//   if (labels.length > 0){
+//   	pos = { x: 0, y: 0 };
+//	pos.x = Number(labels[labels.length-1].zoom_pos_x);
+//	pos.y = Number(labels[labels.length-1].zoom_pos_y);
+//   	target = { x: 0, y: 0 };
+//   	pointer = { x: 0, y: 0 };
+//	scale = Number(labels[labels.length-1].zoom_scale);
+//	console.log("POSSCALE_SEC");
+//	console.log(pos);
+//	console.log(scale);
+//   	image_z.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale},${scale})`;
+//   } else{
+// 	console.log("ZEROLABEL");
+   pos = { x: 0, y: 0 };
+   console.log("POSSCALE_ZERO");
+   console.log(pos);
+   target = { x: 0, y: 0 };
+   pointer = { x: 0, y: 0 };
+   scale = 1;
+//   };
    window.addEventListener('wheel', event => {
      event.preventDefault();
      if (event.ctrlKey) {

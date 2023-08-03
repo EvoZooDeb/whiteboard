@@ -47,7 +47,7 @@
   height: 10px;
   border-radius: 50%;
 } */
-/*  .stone{
+  .stone{
      position: absolute;
      width:50px;
      height:50px;
@@ -57,11 +57,11 @@
      background-position:center;
      background-size: 50% 2px,2px 50%; /*thickness = 2px, length = 50% (25px)*/
      background-repeat:no-repeat;
-  } */
+  } 
   .bowl {
   width: 100%;
   height: 100%;
-  transition: transform .0s;
+  transition: transform .3s;
   transform-origin: 0 0;
   }
 
@@ -175,7 +175,6 @@
     var isDown = false;
     var lastX;
     var lastY;
-    
 
     var drawLabels = function(x_coord, y_coord){
   	    ctx.strokeStyle = "orange";
@@ -191,6 +190,43 @@
 	    ctx.lineTo(x_coord - 25, y_coord);
             ctx.closePath();
             ctx.stroke();
+    }
+    
+    var removeID = function(id){
+         hit = id - 1
+         $.ajax({
+         	type: "GET",
+         	url: "/remove_calibrate/" + id,
+         	success: function(){
+         		$("#s_" + id).remove()
+         		var fields = $(".list-group-item");
+         		var count = 1;
+         		$.each(fields, function() {
+         		    $(this).attr('id','s_' + count);
+         		    count++;
+         		});
+         		var fields = $(".btn-danger");
+         		var count = 1;
+         		$.each(fields, function() {
+         		    $(this).attr('id',count);
+         		    count++;
+         		});
+         		var fields = $(".input-group-addon");
+         		var count = 1;
+         		$.each(fields, function() {
+         		    $(this).text(count);
+         		    count++;
+         		});
+         	}
+             });
+         circles.splice(hit, 1)
+         for (var i = hit; i < circles.length; i++) {
+         	var circle = circles[i];
+         	circle.id = circle.id - 1
+
+         }
+         labels.length = labels.length - 1
+         drawAll() 
     }
     // clear the canvas and redraw all existing circles
     function drawAll() {
@@ -263,7 +299,7 @@
 	   	//pass	
            } else {
 	       c_id = circles[hit].id;
-               window.location.replace("/remove_calibrate/" + c_id);
+	       removeID(c_id)
            }
 	// if control key is up
 	} else {
@@ -271,18 +307,32 @@
            // if hit then set the isDown flag to start a drag
            if (hit < 0) {
                circles.push({
+		   id: labels.length + 1,
                    x: lastX,
                    y: lastY,
-	   	radius: stdRadius
+	   	   radius: stdRadius
                });
-	     console.log("POSSCALE");  
-	     console.log(pos, scale);  
-             window.location.replace("/add_calibrate/" + (labels.length + 1) +
-                    "?x_coord=" + lastX +
-                    "&y_coord=" + lastY +
-	       	    "&zoom_pos_x=" + pos.x +
-	            "&zoom_pos_y=" + pos.y +
-		    "&zoom_scale=" + scale);
+		f_id = labels.length + 1
+		html = '<div class="list-group-item" id="s_'+f_id+'">' + 
+			 	'<div class="input-group">' +
+			     		'<span class="input-group-addon">'+f_id+'</span>' +
+			     		'<text style="background-color:#E5E7E9;" id="c_'+f_id+'" class="form-control custom-control" style="resize:none"> X: '+lastX+' Y: '+lastY+'</text>' +
+			     		'<span class="input-group-btn" >' +
+			     			'<button id= "'+f_id+'" class="btn btn-danger" onclick=removeID(this.id) type="button"><b>-<b></button>' +
+			     		'</span>' +
+			     '</div>' +
+			 '</div>';
+		$.ajax({
+			type: "GET",
+			url: "/add_calibrate/" + f_id +
+		       "?x_coord=" + lastX +
+		       "&y_coord=" + lastY,
+			success: function() {
+					$(".list-group").append(html)
+		   		 }
+				});
+	        drawLabels(Math.round(lastX), Math.round(lastY));
+	        labels.length = labels.length + 1
            } else {
                draggingCircle = circles[hit];
 	       c_id = circles[hit].id;
@@ -346,12 +396,18 @@
 	if (draggingCircle != -1){
 	console.log("ID");
 	console.log(c_id);
-        window.location.replace("/add_calibrate/" + c_id +
-               "?x_coord=" + draggingCircle.x +
-               "&y_coord=" + draggingCircle.y+
-	       "&zoom_pos_x=" + pos.x +
-	       "&zoom_pos_y=" + pos.y +
-	       "&zoom_scale=" + scale);
+	x_coord = draggingCircle.x
+	y_coord = draggingCircle.y
+	$.ajax({
+		type: "GET",
+		url: "/add_calibrate/" + c_id +
+                "?x_coord=" + x_coord +
+                "&y_coord=" + y_coord,
+		success: function() {
+			$("#c_" + c_id).text("X:" + x_coord + "Y:" + y_coord);
+   		 }
+	});
+	draggingCircle = -1
 	}
     }
     
@@ -442,26 +498,26 @@
      w: image_z.offsetWidth, 
      h: image_z.offsetHeight 
    };
-   if (labels.length > 0){
-   	pos = { x: 0, y: 0 };
-	pos.x = Number(labels[labels.length-1].zoom_pos_x);
-	pos.y = Number(labels[labels.length-1].zoom_pos_y);
-   	target = { x: 0, y: 0 };
-   	pointer = { x: 0, y: 0 };
-	scale = Number(labels[labels.length-1].zoom_scale);
-	console.log("POSSCALE_SEC");
-	console.log(pos);
-	console.log(scale);
-   	image_z.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale},${scale})`;
-   } else{
- 	console.log("ZEROLABEL");
- 	pos = { x: 0, y: 0 };
- 	console.log("POSSCALE_ZERO");
- 	console.log(pos);
- 	target = { x: 0, y: 0 };
- 	pointer = { x: 0, y: 0 };
- 	scale = 1;
-   };
+//  if (labels.length > 0){
+//  	pos = { x: 0, y: 0 };
+//       pos.x = Number(labels[labels.length-1].zoom_pos_x);
+//       pos.y = Number(labels[labels.length-1].zoom_pos_y);
+//  	target = { x: 0, y: 0 };
+//  	pointer = { x: 0, y: 0 };
+//       scale = Number(labels[labels.length-1].zoom_scale);
+//       console.log("POSSCALE_SEC");
+//       console.log(pos);
+//       console.log(scale);
+//  	image_z.style.transform = `translate(${pos.x}px,${pos.y}px) scale(${scale},${scale})`;
+//  } else{
+//	console.log("ZEROLABEL");
+   pos = { x: 0, y: 0 };
+   console.log("POSSCALE_ZERO");
+   console.log(pos);
+   target = { x: 0, y: 0 };
+   pointer = { x: 0, y: 0 };
+   scale = 1;
+//  };
    window.addEventListener('wheel', event => {
      event.preventDefault();
      if (event.ctrlKey) {
