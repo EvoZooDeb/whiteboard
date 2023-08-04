@@ -6,6 +6,7 @@ import math
 import csv
 import pandas as pd
 
+# Functions imported from sk.bio read more at: https://github.com/biocore/scikit-bio
 def _validate_counts_vector(counts, suppress_cast=False):
     """Validate and convert input to an acceptable counts vector type.
 
@@ -31,30 +32,57 @@ def skbio_shannon(counts, base):
     nonzero_freqs = freqs[freqs.nonzero()]
     return -(nonzero_freqs * np.log(nonzero_freqs)).sum() / np.log(base)
 
+### Pixel analyze
+## Description:
+# Examines the RGB color code of each pixel on image and based on that classifies them into two categories: board pixel or plant pixel. Based on the pixel positions and classes the function calculates the following parameters: LA, HCV, MHC, VOR, FHD. The function saves the results to a CSV file to project_dir/results.
+
+## Parameters:
+# project_dir: project directory path, read documentation at https://github.com/EvoZooDeb/whiteboard. 
+# board_height: Height of the whiteboard in cm.
+# board_width: Width of the whiteboard in cm.
+# rect_l: Sidelength of reference square in cm.
+
+## Returns:
+# error_images: a list containing the names of images without detectable object
+
 def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5):
-# Define parameters 
+    print("Pixel analysis of image:", file)
+    # Define parameters 
+    # Create relative paths
     transform_output = project_dir + 'images/transformed_images/' 
     analyze_output   = project_dir + 'images/result_images/'
+    
+    # Placeholder lists
     image_names_2 = []
-    str_data = []
-    error_images = []
+    str_data      = []
+    error_images  = []
+
+    # Convert table params to type: float.
     orig_table_height = float(board_height)
     orig_table_width  = float(board_width)
-    rect_l  = float(rect_l)
+    rect_l            = float(rect_l)
 
     # For every transformed image
     for file in os.listdir(transform_output):
+
+        # Load image
         image_full_path = os.path.join(transform_output, file)
         orig_image_cut = cv2.imread(image_full_path)
+
+        # Define sample area by cutting a few centimeters from each side and the top of the image.
         shortening_cm = round(rect_l + 1)
         narrowing_cm  = round(rect_l / 2)
         orig_image_cut = orig_image_cut[shortening_cm*10:,narrowing_cm*10:-narrowing_cm*10]
-        l = 20
-        m = l / 2
+        
     
         # Calculate average white shade
+        # Define variables
+        l = 20
+        m = l / 2
         h, w = orig_image_cut.shape[:2]
         shade_image = orig_image_cut.copy()
+
+        # Starting from the top right corner of the image, crop out squares with the sidelength of l.
         for k in range(0, int(h), int(m)):
             if k+l > h:
                 R_val = None
@@ -62,38 +90,51 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
             for i in range(w, l, -int(m)):
                 sample = shade_image[0 : l, i- l: i]
                 sample_h, sample_w = sample.shape[:2]
-                #cv2.imshow("Top_detected", sample)
-                #cv2.waitKey(0)
-                #cv2.destroyAllWindows()
                 R_val = 255
                 G_val = 255
                 B_val = 255
                 sample_R = []
                 sample_G = []
                 sample_B = []
+                # Append the color values found in the pixels of sample image to unique lists.
                 for y in range(0, l, 1):
                     for x in range(0, sample_w, 1):
                         sample_R.append(sample[y][x][0])
                         sample_G.append(sample[y][x][1])
                         sample_B.append(sample[y][x][2])
+
+                # Examine color values
                 if len(sample_R) > 0 and len(sample_G) > 0 and len(sample_B) > 0:
+
+                    # Calculate average value of each color channel
                     average_R = sum(sample_R) / len(sample_R)
                     average_G = sum(sample_G) / len(sample_G)
                     average_B = sum(sample_B) / len(sample_B)
-                    if 255 - average_R  < 160 and 255 - average_G < 160 and 255 - average_B < 160 and average_G < average_R + 25 and average_G < average_B + 35 :
+                    
+                    # Substract average values from the theoretical white value (255). If all of the results are below the threshold (160) it may indicate a white                        (or greyish in reality) shade.
+                    if 255 - average_R  < 160 and 255 - average_G < 160 and 255 - average_B < 160 and average_G < average_R + 25 and average_G < average_B + 35:
+
+                        # If there is little (< 25) difference between the lowest and highest values in each color channel, it may indicate that the sample picture co                        ntains similar pixels, depicting a uniform object. 
                         if max(sample_R) - min(sample_R) < 25 and max(sample_G) - min(sample_G) < 25  and max(sample_B) - min( sample_B) < 25:
                             R_val = average_R
                             G_val = average_G
                             B_val = average_B
                             break
+
+            # We found the sufficient values
             if R_val == average_R and G_val == average_G and B_val == average_B:
                 break
             else:
+            
+            # Crop out another sample rectangle, next to the previous one with m overlap.
                 shade_image = shade_image[int(m):, : ]
-         
+        
+        # If no sufficent values are found move to the next image
         if R_val == None:
             print(file, ": couldn't calculate average shade")
             continue
+        
+        # Define errors and limits
         R_err = 90
         G_err = 110
         B_err = 120
@@ -106,9 +147,6 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         B_up_lim  = R_val + 45
         
         # Calculate target area
-        #print("RVAL: ", R_val, R_up_lim, R_low_lim)
-        #print("GVAL: ", G_val, G_up_lim, G_low_lim)
-        #print("BVAL: ", B_val, B_up_lim, B_low_lim)
         veg_str = []
         white_rows = 0
         h, w = orig_image_cut.shape[:2]
@@ -179,11 +217,6 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
             else:
                 border = i
                 break
-        #cv2.imshow("Top_detected", orig_image_cut)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
-        #break
-        print("BORDER", border)            
         if border != 0:
             x_max = []
             white_rows = 0
@@ -274,14 +307,19 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     
         # Analyze vegetation structure
         veg_str_df = pd.DataFrame(veg_str, columns = ['y','x', 'value'])
+
+        # Calculate x, y values
         veg_str_df['y'] = veg_str_df['y']/h * (orig_table_height - shortening_cm)
         veg_str_df['y'] = orig_table_height-veg_str_df['y'] - shortening_cm
         veg_str_df['x'] = veg_str_df['x']/w * orig_table_width 
+        
         # Rows where pixel isn't white 
         nrow_1 = veg_str_df[veg_str_df['value'] == 1].shape[0]
+
         # Rownumber
         nrow_all = veg_str_df.shape[0]
-        # Calculate leaf-area
+
+        # Calculate leaf-area and coverage percent
         la = nrow_1/nrow_all*(orig_table_width - narrowing_cm * 2)*(orig_table_height - shortening_cm)
         if math.isnan(la):
             la = 0 
@@ -290,33 +328,47 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         target_area = (orig_table_width - narrowing_cm * 2) * (orig_table_height - shortening_cm)
         coverage_percent = la / target_area *100
         print("Coverage percentage:", coverage_percent, "%")
+
+        # Calculate HCV
         vor_df = veg_str_df.groupby(['y'], as_index = False).sum()
         vor_df = vor_df.drop("x", axis = 1)
+
+        # Rownumber where y = max
         nrow_max = veg_str_df['y'][veg_str_df['y'] == veg_str_df['y'].max()].shape[0]
         vor_df['value'] = vor_df['value'] /nrow_max
+
+        # HCV: The y value where the > 95% of the pixels are part of the vegetation
         hcv = vor_df['y'][vor_df['value'] > 0.95].max()
         if math.isnan(hcv):
             #hcv = 0 
             error_images.append([file, "height of closed vegetation (hcv)"])
         print("HCV:", hcv)
+
+        # MHC: The maximum Y value
         mhc = vor_df['y'][vor_df['value'] > 0].max()
         if math.isnan(mhc):
             #mhc = 0 
             error_images.append([file, "maximum height of vegetation (mhc)"])
         print("MHC:", mhc)
+
+        # VOR
         vor = (hcv + mhc) / 2
         if math.isnan(vor):
             #vor = 0 
             error_images.append([file, "visual obstruction readings (vor)"])
         print("VOR:", vor)
+
+        # Shanon-diversity of pixels.
         fhd = skbio_shannon(vor_df['value'], 2)
         if math.isnan(fhd):
             #fhd = 0 
             error_images.append([file, "foliage height diversity (fhd)"])
         print("FHD:", fhd)
+
+        # Add image name and structural parameters to structure data
         str_data.append([file, la, coverage_percent,hcv,  mhc, vor, fhd])
         
-        # Draw lines at HCV and MHC
+        # Draw lines at HCV and MHC on the image (for visualization)
         if not math.isnan(hcv) and  not math.isnan(mhc):
             hcv_pix = h-(hcv * h)/(orig_table_height - shortening_cm)
             mhc_pix = h-( mhc * h)/ (orig_table_height - shortening_cm)
@@ -328,13 +380,12 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
             orig_image_cut  = cv2.line(orig_image_cut,(0, int(mhc_pix)), (int(w), int(mhc_pix)), (255, 0, 255), 3) # MHC
     
         print(file, "DONE!")
+
+        # Save resulting image: black pixels indicate table pixels, vegetation pixels remain unchanged
         analyze_full_output = os.path.join(analyze_output, file)
-        #cv2.imshow("Top_detected", orig_image_cut)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
         cv2.imwrite(analyze_full_output, orig_image_cut)
     
-    # Save veg_str results
+    # Save veg_str results to CSV file
     str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhc', 'vor', 'fhd'])
     str_df.to_csv((project_dir + "results/veg_str_22.csv"), sep = ',', encoding = 'utf-8')
     return error_images

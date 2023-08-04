@@ -94,6 +94,8 @@ def submit_detect():
         globals()["glob_p_gap_side"]       = p_gap_side
         globals()["glob_save_images"]      = save_images
         app.config["FILES"] = glob_img_list
+
+        # For each picture in image directory place 0 as placeholder to config-data lists.
         for f in glob_img_list:
             global_config_data.append(0)
             global_seq_id_data.append(0)
@@ -107,9 +109,14 @@ def calibrate():
     labels = app.config["LABELS"]
     return render_template('calibrate.html', directory=directory, image=image, head = 0, labels=labels, len=len(app.config["FILES"]))
 
+# On image-click event, add mouse position, image name and point (label) id to config data.
 @app.route('/add_calibrate/<id>', methods=['GET'])
 def add_calibrate(id):
+    
+    # If there are points in config data, check their id.
     if len(app.config["LABELS"]) != 0:
+        
+        # If the id of the point hasn't been declared before, apply the params to config data.
         if int(id) not in id_seq:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -121,7 +128,8 @@ def add_calibrate(id):
             app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
         else:
-            # More than one coord for an ID -- > Object dragged, update coord values
+            
+            # More than one coord for a single ID -- > Point been dragged, update coord values.
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
             #zoom_pos_x = request.args.get("zoom_pos_x")
@@ -132,6 +140,8 @@ def add_calibrate(id):
             #app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
             #app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
             #app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
+    
+    # If there is no point recorded in config data, append the parameters of the first points.
     else:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -145,6 +155,7 @@ def add_calibrate(id):
     #return redirect(url_for('calibrate'))
     return ('', 204)
 
+# On ctrl + image-click event (or clicking the '-' button'), remove point having target id.
 @app.route('/remove_calibrate/<id>')
 def remove_calibrate(id):
     index = int(id) - 1
@@ -157,6 +168,7 @@ def remove_calibrate(id):
     #return redirect(url_for('calibrate'))
     return redirect('', 204)
 
+# Submint data on calibration page.
 @app.route('/calibrate/', methods = ["POST"])
 def submit_calibrate():
 
@@ -209,7 +221,7 @@ def submit_calibrate():
         for f in os.listdir(edge_detected_dir):
             os.remove(os.path.join(edge_detected_dir, f))
     
-    # to open/create a new html file in the write mode
+    # create a HTML page which instructs about the location of the results
     f = open('templates/final_2.html', 'w')
     html_template = """
      <html>
@@ -236,6 +248,8 @@ def submit_calibrate():
    
     # Create report of object detection, transformation and analysis results.
     f = open(glob_project_dir_path + "results/report.txt", 'w')
+    
+    # Report message of object detection
     f.write("Results of object detection: \n")
     if len(object_detection_errors) != 0:
         for img in object_detection_errors:
@@ -244,6 +258,8 @@ def submit_calibrate():
     else:
         line_text = "Success: Detected the whiteboard on all images. \n"
         f.write(line_text)
+    
+    # Report message of reference rectangle detection
     f.write("\n Results of reference rectangle detection: \n")
     if len(transformation_errors) != 0:
         for img in transformation_errors:
@@ -253,6 +269,7 @@ def submit_calibrate():
         line_text = "Success: Found at least 1 reference rectangle on all images. \n"
         f.write(line_text)
     
+    # Report message of keypoint detection
     f.write("\n Results of keypoint detection: \n")
     if len(transformation_warnings) != 0:
         for img, color in transformation_warnings:
@@ -262,6 +279,7 @@ def submit_calibrate():
         line_text = "Success: The detected number of keypoints on all images are the same as expected (12). \n"
         f.write(line_text)
 
+    # Report message of pixel analysis
     f.write("\n Results of pixel analysis: \n")
     if len(analysis_errors) != 0:
         for img, param in analysis_errors:
@@ -273,15 +291,16 @@ def submit_calibrate():
     f.close()
     return redirect(url_for('final_2'))
 
-# Result checker page for automated detection
+# Result checker page for automated detection. Here the user can modify the location of keypoints and re-run the transformation.
 @app.route('/check_results')
 def check_results():
+    # Define variables
     directory = app.config["IMAGES"]
     app.config["FILES"] = glob_img_list
     globals()["image"] = app.config["FILES"][app.config["HEAD"]]
-    #globals()["id_seq"] = []
     globals()["label_count"] = 0
-    #app.config["LABELS"] = []
+
+    # If there was any points detected on the image, add their params to config-data.
     if len(globals()["transformation_config"]) != 0 and app.config["LABELS"] == []:
         for i in globals()["transformation_config"]:
             if i["name"] == image:
@@ -289,21 +308,35 @@ def check_results():
                 globals()["label_count"] = label_count + 1
                 globals()["id_seq"].append(label_count)
     labels = app.config["LABELS"]
+
+    # A variable which tells whether the last image is displayed or not.
     not_end   = not(app.config["HEAD"] == len(app.config["FILES"]) - 1)
+    
+    # A variable which tells whether the first image is displayed or not.
     not_first = not(app.config["HEAD"] == 0)
+    
+    # Render the page using defined variables.
     return render_template('check.html', not_first=not_first, not_end=not_end, directory=directory, image=image, labels=labels, head=app.config["HEAD"] + 1, len=len(app.config["FILES"]))
 
 # Next button for result checker
 @app.route('/next_results')
 def next_results():
+    
+    # Define variables
     image = app.config["FILES"][app.config["HEAD"]]
     global_config_data[app.config["HEAD"]] = app.config["LABELS"]
     global_seq_id_data[app.config["HEAD"]] = id_seq
+
+    # Increase HEAD param by 1. HEAD is the index of the image to be loaded.
     app.config["HEAD"] = app.config["HEAD"] + 1
     globals()["label_count"] = 0
+
+    # Save drawn points on current picture to pointsdata.
     for label in app.config["LABELS"]:
         globals()["annotated_points"].append([label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
         globals()["label_count"] = globals()["label_count"] + 1
+
+    # If the next image has any points recorded in the global config data load them. If not, open the plain image.
     if global_config_data[app.config["HEAD"]] == 0:
         app.config["LABELS"] = []
         globals()["id_seq"] = []
@@ -316,15 +349,26 @@ def next_results():
 @app.route('/prev_results')
 def prev_results():
     image = app.config["FILES"][app.config["HEAD"]]
+    
+    # Decrease HEAD param by 1.
     app.config["HEAD"] = app.config["HEAD"] - 1
+    
+    # Remove drawn points from points data.
     globals()["annotated_points"] = globals()["annotated_points"][:len(globals()["annotated_points"]) - globals()["label_count"]]
+
+    # Load config data params for previous image.
     globals()["id_seq"] = global_seq_id_data[app.config["HEAD"]] 
     app.config["LABELS"] = global_config_data[app.config["HEAD"]]
     return redirect(url_for('check_results'))
 
+# On image-click event, add mouse position, image name and point (label) id to config data.
 @app.route('/add_results/<id>', methods=['GET'])
 def add_results(id):
+
+    # If there are points in config data, check their id.
     if len(app.config["LABELS"]) != 0:
+
+        # If the id of the point hasn't been declared before, apply the params to config data.
         if int(id) not in id_seq:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -336,7 +380,8 @@ def add_results(id):
             app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
         else:
-            # More than one coord for an ID -- > Object dragged, update coord values
+            
+            # More than one coord for a single ID -- > Point been dragged, update coord values.
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
             #zoom_pos_x = request.args.get("zoom_pos_x")
@@ -347,6 +392,8 @@ def add_results(id):
             #app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
             #app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
             #app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
+
+    # If there is no point recorded in config data, append the parameters of the first points.
     else:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -360,6 +407,7 @@ def add_results(id):
     #return redirect(url_for('check_results'))
     return ('', 204)
 
+# On ctrl + image-click event (or clicking the '-' button'), remove point having target id.
 @app.route('/remove_results/<id>')
 def remove_results(id):
     index = int(id) - 1
@@ -372,21 +420,24 @@ def remove_results(id):
     #return redirect(url_for('check_results'))
     return ('', 204)
 
+# Submit data on check_results page.
 @app.route('/check_results/', methods = ["POST"])
 def submit_check_results():
     for label in app.config["LABELS"]:
         annotated_points.append([label["name"],float(label["x_coord"]), float(label["y_coord"])])
     annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
     
-    # Transformation based on corrected coords
+    # Run transformation based on corrected coords
     transformation_errors = work_from_coord.work_from_coord(glob_orig_path, 0, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, 0, 0, "x_coord", "y_coord", "name", "data_frame", annotated_points_dataframe)
     #transformation_errors = []
     
     # Pixel analysis
     analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
     
+    # If save images is on, keep images
     if glob_save_images == "on":
         pass
+    # Else delete them
     else:
         transformation_dir = glob_project_dir_path + "images/transformed_images"
         for f in os.listdir(transformation_dir):
@@ -394,7 +445,8 @@ def submit_check_results():
         results_dir = glob_project_dir_path + "images/result_images"
         for f in os.listdir(results_dir):
             os.remove(os.path.join(results_dir, f))
-    # to open/create a new html file in the write mode
+    
+    # create a HTML page which instructs about the location of the results
     f = open('templates/final.html', 'w')
     html_template = """
      <html>
@@ -416,19 +468,21 @@ def submit_check_results():
    
     # Create report of transformation and analysis results.
     f = open(glob_project_dir_path + "results/report_rerun.txt", 'w')
+    
+    # Report message of keypoint detection
     f.write("Results of keypoint detection: \n")
     if len(transformation_errors) != 0:
         for img, count in transformation_errors:
-            print(img, count)
             line_text = "Count error: The provided number of keypoints on image: {} is {} (expected 12). \n".format(img, str(count))
             f.write(line_text)
     else:
         line_text = "Success: The provided number of keypoints on all images are the same as expected (12). \n"
         f.write(line_text)
+
+    # Report message of pixel analysis
     f.write("\n Results of pixel analysis: \n")
     if len(analysis_errors) != 0:
         for img, param in analysis_errors:
-            print(img, param)
             line_text = "Value error: The calculated value of {} on image: {} is Nan. \n".format(param, img)
             f.write(line_text)
     else:
@@ -438,12 +492,15 @@ def submit_check_results():
     return redirect(url_for('final'))
 
 ### Transformation using coords from CSV file.
+# Parameter supply page for load from csv method.
 @app.route('/csv/')
 def csv():
     return render_template('csv.html')
 
 @app.route('/csv/', methods = ["POST"])
 def submit_csv():
+    
+    # Define variables based on user input.
     orig_path = request.form.get("Orig_path") 
     coord_path = request.form.get("Coord_path")
     project_dir_path = request.form.get("Project_dir_path") 
@@ -481,10 +538,17 @@ def submit_csv():
         globals()["glob_colname_x"]        = colname_x
         globals()["glob_colname_y"]        = colname_y
         globals()["glob_colname_img"]      = colname_img
+
+        # Transformation based on CSV coords
         transformation_errors = work_from_coord.work_from_coord(glob_orig_path, glob_coord_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, glob_sep, glob_header, glob_colname_x, glob_colname_y, glob_colname_img)
+        
+        # Pixel analysis
         analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
+        
+        # If save images is on, keep images
         if save_images == "on":
             pass
+        # Else delete them
         else:
             transformation_dir = glob_project_dir_path + "images/transformed_images"
             for f in os.listdir(transformation_dir):
@@ -493,7 +557,7 @@ def submit_csv():
             for f in os.listdir(results_dir):
                 os.remove(os.path.join(results_dir, f))
 
-        # to open/create a new html file in the write mode
+        # create a HTML page which instructs about the location of the results
         f = open('templates/final.html', 'w')
         html_template = """
          <html>
@@ -515,34 +579,38 @@ def submit_csv():
         
         # Create report of transformation and analysis results.
         f = open(glob_project_dir_path + "results/report.txt", 'w')
-        f.write("Results of keypoint detection: \n")
+
+        # Report message of keypoint counting
+        f.write("Results of keypoint counting: \n")
         if len(transformation_errors) != 0:
             for img, count in transformation_errors:
-                print(img, count)
                 line_text = "Count error: The provided number of keypoints on image: {} is {} (expected 12). \n".format(img, str(count))
                 f.write(line_text)
         else:
             line_text = "Success: The provided number of keypoints on all images are the same as expected (12). \n"
             f.write(line_text)
+
+        # Report message of pixel analysis
         f.write("\n Results of pixel analysis: \n")
         if len(analysis_errors) != 0:
             for img, param in analysis_errors:
-                print(img, param)
                 line_text = "Value error: The calculated value of {} on image: {} is Nan. \n".format(param, img)
                 f.write(line_text)
         else:
             line_text = "Success: The calculated structural parameters are valid numbers."
             f.write(line_text)
         f.close()
-
     return redirect(url_for('final'))
 
+# Parameter supply page for annotation in site method
 @app.route('/annotate/')
 def annotate():
     return render_template('annotate.html')
 
 @app.route('/annotate/', methods = ["POST"])
 def submit_annotate():
+    
+    # Define variables based on user input.
     orig_path = request.form.get("Orig_path") 
     project_dir_path = request.form.get("Project_dir_path") 
     board_height = request.form.get("Board_height")
@@ -570,34 +638,51 @@ def submit_annotate():
         globals()["glob_p_gap_top"]        = p_gap_top
         globals()["glob_p_gap_side"]       = p_gap_side
         globals()["glob_save_images"]      = save_images
-        print(glob_img_list)
         app.config["FILES"] = glob_img_list
+       
+        # For each picture in image directory place 0 as placeholder to config-data lists.
         for f in glob_img_list:
             global_config_data.append(0)
             global_seq_id_data.append(0)
         return redirect(url_for("tagger"))
 
+# Image annotator page. Here the user can mark the keypoints of reference rectangles.
 @app.route('/tagger')
 def tagger():
+    # Define variables based on config data
     directory = app.config["IMAGES"]
     globals()["image"] = app.config["FILES"][app.config["HEAD"]]
     labels = app.config["LABELS"]
+
+    # A variable which tells whether the last image is displayed or not.
     not_end   = not(app.config["HEAD"] == len(app.config["FILES"]) - 1)
+
+    # A variable which tells whether the first image is displayed or not.
     not_first = not(app.config["HEAD"] == 0)
-    print(not_first)
+    
+    # Render the page using defined variables.
     return render_template('tagger.html', not_first=not_first, not_end=not_end, directory=directory, image=image, labels=labels, head=app.config["HEAD"] + 1, len=len(app.config["FILES"]))
 
+# Next button for image annotator
 @app.route('/next')
 def next():
+
+    # Define variables
     image = app.config["FILES"][app.config["HEAD"]]
     global_config_data[app.config["HEAD"]] = app.config["LABELS"]
     global_seq_id_data[app.config["HEAD"]] = id_seq
+
+    # Increase HEAD param by 1. HEAD is the index of the image to be loaded.
     app.config["HEAD"] = app.config["HEAD"] + 1
     globals()["label_count"] = 0
+
+    # Save drawn points on current picture to points data.
     for label in app.config["LABELS"]:
         #annotated_points.append([label["id"],label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
         globals()["annotated_points"].append([label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
         globals()["label_count"] = globals()["label_count"] + 1
+
+    # If the next image has any points recorded in the global config data load them. If not, open the plain image.
     if global_config_data[app.config["HEAD"]] == 0:
         app.config["LABELS"] = []
         globals()["id_seq"] = []
@@ -606,22 +691,30 @@ def next():
         app.config["LABELS"] = global_config_data[app.config["HEAD"]]
     return redirect(url_for('tagger'))
 
+# Prev button for image annotator
 @app.route('/prev')
 def prev():
     image = app.config["FILES"][app.config["HEAD"]]
+
+    # Decrease HEAD param by 1.
     app.config["HEAD"] = app.config["HEAD"] - 1
-    # Visszaszűrni
+    
+    # Remove drawn points from points data.
     globals()["annotated_points"] = globals()["annotated_points"][:len(globals()["annotated_points"]) - globals()["label_count"]]
-    print("ANN POINTS", len(annotated_points), globals()["label_count"],"PTS", annotated_points)
+
+    # Load config data params for previous image.
     globals()["id_seq"] = global_seq_id_data[app.config["HEAD"]] 
     app.config["LABELS"] = global_config_data[app.config["HEAD"]]
     return redirect(url_for('tagger'))
 
+# On image-click event, add mouse position, image name and point (label) id to config data.
 @app.route('/add/<id>', methods=['GET'])
 def add(id):
-    print("SEQ", id_seq)
-    print("EARLY_ID", id)
+
+    # If there are points in config data, check their id.
     if len(app.config["LABELS"]) != 0:
+
+        # If the id of the point hasn't been declared before, apply the params to config data.
         if int(id) not in id_seq:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -632,9 +725,9 @@ def add(id):
             #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
             app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
-            print("LABELS", app.config["LABELS"])
+
+        # Else: More than one coord for a single ID -- > Point been dragged, update coord values.
         else:
-            # More than one coord for an ID -- > Object dragged, update coord values
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
             #zoom_pos_x = request.args.get("zoom_pos_x")
@@ -645,6 +738,8 @@ def add(id):
             #app.config["LABELS"][int(id)-1]["zoom_pos_x"] = zoom_pos_x
             #app.config["LABELS"][int(id)-1]["zoom_pos_y"] = zoom_pos_y
             #app.config["LABELS"][int(id)-1]["zoom_scale"] = zoom_scale
+
+    # If there is no point recorded in config data, append the parameters of the first points.
     else:
             x_coord = request.args.get("x_coord")
             y_coord = request.args.get("y_coord")
@@ -652,14 +747,13 @@ def add(id):
             #zoom_pos_y = request.args.get("zoom_pos_y")
             #zoom_scale = request.args.get("zoom_scale")
             name = image
-            print("FIRST", x_coord, y_coord)
             #app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord, "zoom_pos_x": zoom_pos_x,"zoom_pos_y":  zoom_pos_y, "zoom_scale": zoom_scale})
             app.config["LABELS"].append({"id":id, "name":name, "x_coord":x_coord, "y_coord":y_coord})
             id_seq.append(int(id))
-            print("LABELS", app.config["LABELS"])
     #return redirect(url_for('tagger'))
     return ('', 204)
 
+# On ctrl + image-click event (or clicking the '-' button'), remove point having target id.
 @app.route('/remove/<id>')
 def remove(id):
     index = int(id) - 1
@@ -672,22 +766,24 @@ def remove(id):
     #return redirect(url_for('tagger'))
     return redirect('', 204)
 
-@app.route('/image/<f>')
-def get_image_2(f):
-    return send_from_directory(glob_orig_path, f)
-
+# Submit data on image annotator
 @app.route('/tagger/', methods = ["POST"])
 def submit_annotation():
     for label in app.config["LABELS"]:
         annotated_points.append([label["name"],float(label["x_coord"]), float(label["y_coord"])])
     annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
     
+    # Run transformation based on annotated coords
     transformation_errors = work_from_coord.work_from_coord(glob_orig_path, 0, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, 0, 0, "x_coord", "y_coord", "name", "data_frame", annotated_points_dataframe)
     #transformation_errors = []
     
+    # Pixel analysis
     analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
+
+    # If save images is on, keep images
     if glob_save_images == "on":
         pass
+    # Else delete them
     else:
         transformation_dir = glob_project_dir_path + "images/transformed_images"
         for f in os.listdir(transformation_dir):
@@ -695,7 +791,8 @@ def submit_annotation():
         results_dir = glob_project_dir_path + "images/result_images"
         for f in os.listdir(results_dir):
             os.remove(os.path.join(results_dir, f))
-    # to open/create a new html file in the write mode
+
+    # create a HTML page which instructs about the location of the results
     f = open('templates/final.html', 'w')
     html_template = """
      <html>
@@ -717,19 +814,21 @@ def submit_annotation():
    
     # Create report of transformation and analysis results.
     f = open(glob_project_dir_path + "results/report.txt", 'w')
+    
+    # Report message of keypoint detection
     f.write("Results of keypoint detection: \n")
     if len(transformation_errors) != 0:
         for img, count in transformation_errors:
-            print(img, count)
             line_text = "Count error: The provided number of keypoints on image: {} is {} (expected 12). \n".format(img, str(count))
             f.write(line_text)
     else:
         line_text = "Success: The provided number of keypoints on all images are the same as expected (12). \n"
         f.write(line_text)
+
+    # Report message of pixel analysis
     f.write("\n Results of pixel analysis: \n")
     if len(analysis_errors) != 0:
         for img, param in analysis_errors:
-            print(img, param)
             line_text = "Value error: The calculated value of {} on image: {} is Nan. \n".format(param, img)
             f.write(line_text)
     else:
@@ -738,6 +837,12 @@ def submit_annotation():
     f.close()
     return redirect(url_for('final'))
 
+# Load image from non-static directory
+@app.route('/image/<f>')
+def get_image_2(f):
+    return send_from_directory(glob_orig_path, f)
+
+# Render final pages
 @app.route('/final')
 def final():
     app.config["LABELS"] = []
@@ -754,10 +859,11 @@ def final_2():
     globals()["id_seq"] = []
     return render_template("final_2.html")
 
+# Open a browser tab
 threading.Timer(1, lambda: webbrowser.open(url)).start()
+
+# Start application
 if __name__=='__main__':
-# In background
-#   threading.Thread(target = app.run).start() 
     app.config["IMAGES"] = 'images'
     app.config["LABELS"] = []
     app.config["HEAD"] = 0
