@@ -1,13 +1,18 @@
 <html>
 <head>
-	<title>Load coords from CSV</title>
+	<title>Suppy parameters for CSV import</title>
 </head>
+<style>
+</style>
 <script>	    
 function showDiv() {
       document.getElementById('Submit').style.display = "none";
       document.getElementById("page").style.display = "none";
       document.getElementById('loadingGif').style.display = "block";
+      document.getElementById('loadingGif').style.textAlign = "center";
+      document.getElementById('loadingGif').style.padding = "300px 0 0 0";
       document.getElementById('loadingMessage').style.display = "block";
+      document.getElementById('loadingMessage').style.textAlign = "center";
 }
 </script>
 <div id="loadingGif" style="display:none"><img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"></div>
@@ -15,7 +20,7 @@ function showDiv() {
 <body>
 <div class="wrapper" id = "page"> 
   <form action="{{ url_for("submit_csv")}}" method="post" onsubmit= "showDiv()" > 
-    <h2>Test One</h2>
+    <h2>Supply paremeters for CSV import</h2>
     <label>
       Original images path
       <p><input type="text" name="Orig_path" id="Orig_path" required ></p>
@@ -86,7 +91,7 @@ function showDiv() {
     </label>
     <label>
       Save images:
-      <p><input type="checkbox" name="Save_images" id="Save_images" checked></p>
+      <p><input type="checkbox" name="Save_images" id="Save_images"></p>
     </label>
     <p><input type=submit value=Run_transformation id="Submit"></p>
   </form>

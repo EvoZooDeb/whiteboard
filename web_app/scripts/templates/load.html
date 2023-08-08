@@ -1,18 +1,18 @@
 <html>
 <head>
-	<title>Choose a method</title>
+	<title>Choose method</title>
 </head>
 <body>
 <div class="load"> 
   <form action="{{ url_for("submit_load")}}" method="post">
-    <h2>Test One</h2>
+    <h2>Choose method</h2>
     <label>
       <input type="radio" name="Load" value="CSV" required>
-      Load coords from CSV
+      Import from CSV
     </label>
     <label>
       <input type="radio" name="Load" value="Annotate" required>
-      Annotate Images
+      Record keypoint coordinates
     </label>
     <p><input type=submit value=Next></p>
   </form>

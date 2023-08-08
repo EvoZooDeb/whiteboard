@@ -177,7 +177,6 @@ def submit_calibrate():
         annotated_points.append([label["name"],float(label["x_coord"]), float(label["y_coord"])])
 
     # If all keypoints are annotated
-    print("TEST", len(annotated_points))
     if len(annotated_points) == 12:
         annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
         image_name = annotated_points_dataframe['name'][0]

@@ -1,22 +1,14 @@
 <html>
 <head>
-	<title>Define detection parameters</title>
+	<title>Supply parameters for automated detection</title>
 </head>
-<script>	    
-function showDiv() {
-      document.getElementById('Submit').style.display = "none";
-      document.getElementById("page").style.display = "none";
-      document.getElementById('loadingGif').style.display = "block";
-      document.getElementById('loadingMessage').style.display = "block";
-}
-</script>
 <div id="loadingGif" style="display:none"><img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"></div>
 <div id="loadingMessage" style="display:none"<label> Object detection, transformation and pixel analysis in progress. This could take 10-12 second per image.</label></div>
 
 <body>
 <div class="detect" id = "page"> 
-  <form action="{{ url_for("submit_detect")}}" method="post" onsubmit="showDiv()">
-    <h2>Test One</h2>
+  <form action="{{ url_for("submit_detect")}}" method="post">
+    <h2>Supply parameters for automated detection</h2>
     <label>
       Original images path
       <p><input type="text" name="Orig_path" id="Orig_path" required ></p>

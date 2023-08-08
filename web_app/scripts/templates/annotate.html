@@ -1,11 +1,11 @@
 <html>
 <head>
-	<title>Define annotation parameters</title>
+	<title>Supply parameters for keypoint recording</title>
 </head>
 <body>
 <div class="wrapper"> 
   <form action="{{ url_for("submit_annotate")}}" method="post">
-    <h2>Test One</h2>
+    <h2>Supply parameters for keypoint recording</h2>
     <label>
       Original images path
       <p><input type="text" name="Orig_path" id="Orig_path" required ></p>
@@ -52,7 +52,7 @@
     </label>
     <label>
       Save images:
-      <p><input type="checkbox" name="Save_images" id="Save_images" checked></p>
+      <p><input type="checkbox" name="Save_images" id="Save_images"></p>
     </label>
     <p><input type=submit value=Annotation></p>
   </form>
