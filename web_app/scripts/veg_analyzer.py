@@ -323,7 +323,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         # Calculate leaf-area and coverage percent
         la = nrow_1/nrow_all*(orig_table_width - narrowing_cm * 2)*(orig_table_height - shortening_cm)
         if math.isnan(la):
-            la = 0 
+            la = 'NA'
             error_images.append([file, "leaf area (la)"])
         print("LA:", la)
         target_area = (orig_table_width - narrowing_cm * 2) * (orig_table_height - shortening_cm)
@@ -341,28 +341,29 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         # HCV: The y value where the > 95% of the pixels are part of the vegetation
         hcv = vor_df['y'][vor_df['value'] > 0.95].max()
         if math.isnan(hcv):
-            #hcv = 0 
+            hcv = 'NA' 
             error_images.append([file, "height of closed vegetation (hcv)"])
         print("HCV:", hcv)
 
         # MHC: The maximum Y value
         mhc = vor_df['y'][vor_df['value'] > 0].max()
         if math.isnan(mhc):
-            #mhc = 0 
+            mhc = 'NA'
             error_images.append([file, "maximum height of vegetation (mhc)"])
         print("MHC:", mhc)
 
         # VOR
-        vor = (hcv + mhc) / 2
-        if math.isnan(vor):
-            #vor = 0 
+        if mhc != 'NA' and hcv != 'NA':
+            vor = (hcv + mhc) / 2
+            print("VOR:", vor)
+        else:
+            vor = 'NA'
             error_images.append([file, "visual obstruction readings (vor)"])
-        print("VOR:", vor)
 
         # Shanon-diversity of pixels.
         fhd = skbio_shannon(vor_df['value'], 2)
         if math.isnan(fhd):
-            #fhd = 0 
+            fhd = 'NA'
             error_images.append([file, "foliage height diversity (fhd)"])
         print("FHD:", fhd)
 
@@ -370,7 +371,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         str_data.append([file, la, coverage_percent,hcv,  mhc, vor, fhd])
         
         # Draw lines at HCV and MHC on the image (for visualization)
-        if not math.isnan(hcv) and  not math.isnan(mhc):
+        if hcv != 'NA' and mhc != 'NA':
             hcv_pix = h-(hcv * h)/(orig_table_height - shortening_cm)
             mhc_pix = h-( mhc * h)/ (orig_table_height - shortening_cm)
             if math.isnan(hcv_pix):
