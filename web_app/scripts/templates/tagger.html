@@ -114,6 +114,7 @@
       ctx.drawImage(image, 0, 0);
       for (i = 0; i < labels.length; i++){
             drawLabels(Math.round(labels[i].x_coord), Math.round(labels[i].y_coord));
+	    createElement(labels[i].id, Math.round(labels[i].x_coord), Math.round(labels[i].y_coord));
             //drawLabels(labels[i].x_coord, labels[i].y_coord);
             circles.push({
 		id: labels[i].id,    
@@ -186,6 +187,20 @@
 	drawAll()
 	
     }
+
+    var createElement = function(id, x_coord, y_coord) {
+    	html = '<div class="list-group-item" id="s_'+id+'">' + 
+    	       	'<div class="input-group">' +
+    	    		'<span class="input-group-addon">'+id+'</span>' +
+    	   		'<text style="background-color:#E5E7E9;" id="c_'+id+'" class="form-control custom-control" style="resize:none"> X: '+x_coord+' Y: '+y_coord+'</text>' +
+    	    		'<span class="input-group-btn" >' +
+    	   			'<button id= "'+id+'" class="btn btn-danger" onclick=removeID(this.id) type="button"><b>-<b></button>' +
+    	   		'</span>' +
+    	   	'</div>' +
+    	       '</div>';
+    	$(".list-group").append(html)
+    }
+
 
     // clear the canvas and redraw all existing circles
     function drawAll() {
