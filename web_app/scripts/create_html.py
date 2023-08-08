@@ -168,128 +168,135 @@ def remove_calibrate(id):
     #return redirect(url_for('calibrate'))
     return redirect('', 204)
 
-# Submint data on calibration page.
+# Submit data on calibration page.
 @app.route('/calibrate/', methods = ["POST"])
 def submit_calibrate():
-
+    
     # Define variables
     for label in app.config["LABELS"]:
         annotated_points.append([label["name"],float(label["x_coord"]), float(label["y_coord"])])
-    annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
-    image_name = annotated_points_dataframe['name'][0]
-    error_images = []
-    old_points   = [] 
-    
-    # Organize calibration points
-    work_from_coord.transform_by_coord(file_path = "", sep = 0, header = 0, x = "x_coord", y = "y_coord", label = "name", image_name = image_name, old_points = old_points, data_type = "data_frame", data_frame = annotated_points_dataframe, error_images = error_images)
-    
-    # Calculate average side length based on calibration data
-    average_side_length = detect_and_transform.calc_average_side_length(old_points)
-    
-    # Object detection
-    object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path)
-    #object_detection_errors = []
-    
-    # Keypoint detection and transformation
-    transformation_errors, transformation_warnings, transformation_config = detect_and_transform.detect_and_transform(glob_orig_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, average_side_length)
-    globals()["transformation_config"] = transformation_config 
-    #transformation_errors = []
-    #transformation_warnings = []
-    
-    # Pixel analysis
-    analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
-    #analysis_errors = []
-    
-    # If save images is on, keep images
-    if glob_save_images == "on":
-        pass
-    # Else delete them
-    else:
-        transformation_dir = glob_project_dir_path + "images/transformed_images"
-        for f in os.listdir(transformation_dir):
-            os.remove(os.path.join(transformation_dir, f))
-        results_dir = glob_project_dir_path + "images/result_images"
-        for f in os.listdir(results_dir):
-            os.remove(os.path.join(results_dir, f))
-        box_dir = glob_project_dir_path + "images/box_images"
-        for f in os.listdir(box_dir):
-            os.remove(os.path.join(box_dir, f))
-        cropped_dir = glob_project_dir_path + "images/cropped_images"
-        for f in os.listdir(cropped_dir):
-            os.remove(os.path.join(cropped_dir, f))
-        edge_detected_dir = glob_project_dir_path + "images/edge_detected_images"
-        for f in os.listdir(edge_detected_dir):
-            os.remove(os.path.join(edge_detected_dir, f))
-    
-    # create a HTML page which instructs about the location of the results
-    f = open('templates/final_2.html', 'w')
-    html_template = """
-     <html>
-    <body>
-    <div class="wrapper"> 
-        <h2>Success the results are in {}</h2>
-        <a href="/" type="button">
-        Home
-        </a>
-        <a href="/check_results"class="btn btn-primary" type="button">
-        Check results!
-        </a>
-    </div>
-    </html>
-    </body>
-    </html>
-    """.format(glob_project_dir_path + "results/")
-    
-    # writing the code into the file
-    f.write(html_template)
-    
-    # close the file
-    f.close()
-   
-    # Create report of object detection, transformation and analysis results.
-    f = open(glob_project_dir_path + "results/report.txt", 'w')
-    
-    # Report message of object detection
-    f.write("Results of object detection: \n")
-    if len(object_detection_errors) != 0:
-        for img in object_detection_errors:
-            line_text = "Detection error: No whiteboard detected on image: {}. \n".format(img)
-            f.write(line_text)
-    else:
-        line_text = "Success: Detected the whiteboard on all images. \n"
-        f.write(line_text)
-    
-    # Report message of reference rectangle detection
-    f.write("\n Results of reference rectangle detection: \n")
-    if len(transformation_errors) != 0:
-        for img in transformation_errors:
-            line_text = "Count error: No reference rectangle found on image: {}. \n".format(img)
-            f.write(line_text)
-    else:
-        line_text = "Success: Found at least 1 reference rectangle on all images. \n"
-        f.write(line_text)
-    
-    # Report message of keypoint detection
-    f.write("\n Results of keypoint detection: \n")
-    if len(transformation_warnings) != 0:
-        for img, color in transformation_warnings:
-            line_text = "Count warning: On image: {} the {} reference rectangle was not found. Using the other two for transformation, if possible. \n".format(img, color)
-            f.write(line_text)
-    else:
-        line_text = "Success: The detected number of keypoints on all images are the same as expected (12). \n"
-        f.write(line_text)
 
-    # Report message of pixel analysis
-    f.write("\n Results of pixel analysis: \n")
-    if len(analysis_errors) != 0:
-        for img, param in analysis_errors:
-            line_text = "Value error: The calculated value of {} on image: {} is Nan. \n".format(param, img)
+    # If all keypoints are annotated
+    if len(annotated_points) == 12:
+        annotated_points_dataframe = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
+        image_name = annotated_points_dataframe['name'][0]
+        error_images = []
+        old_points   = [] 
+        
+        # Organize calibration points
+        work_from_coord.transform_by_coord(file_path = "", sep = 0, header = 0, x = "x_coord", y = "y_coord", label = "name", image_name = image_name, old_points = old_points, data_type = "data_frame", data_frame = annotated_points_dataframe, error_images = error_images)
+        
+        # Calculate average side length based on calibration data
+        average_side_length = detect_and_transform.calc_average_side_length(old_points)
+        
+        # Object detection
+        object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path)
+        #object_detection_errors = []
+        
+        # Keypoint detection and transformation
+        transformation_errors, transformation_warnings, transformation_config = detect_and_transform.detect_and_transform(glob_orig_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, average_side_length)
+        globals()["transformation_config"] = transformation_config 
+        #transformation_errors = []
+        #transformation_warnings = []
+        
+        # Pixel analysis
+        analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
+        #analysis_errors = []
+        
+        # If save images is on, keep images
+        if glob_save_images == "on":
+            pass
+        # Else delete them
+        else:
+            transformation_dir = glob_project_dir_path + "images/transformed_images"
+            for f in os.listdir(transformation_dir):
+                os.remove(os.path.join(transformation_dir, f))
+            results_dir = glob_project_dir_path + "images/result_images"
+            for f in os.listdir(results_dir):
+                os.remove(os.path.join(results_dir, f))
+            box_dir = glob_project_dir_path + "images/box_images"
+            for f in os.listdir(box_dir):
+                os.remove(os.path.join(box_dir, f))
+            cropped_dir = glob_project_dir_path + "images/cropped_images"
+            for f in os.listdir(cropped_dir):
+                os.remove(os.path.join(cropped_dir, f))
+            edge_detected_dir = glob_project_dir_path + "images/edge_detected_images"
+            for f in os.listdir(edge_detected_dir):
+                os.remove(os.path.join(edge_detected_dir, f))
+        
+        # create a HTML page which instructs about the location of the results
+        f = open('templates/final_2.html', 'w')
+        html_template = """
+         <html>
+        <body>
+        <div class="wrapper"> 
+            <h2>Success the results are in {}</h2>
+            <a href="/" type="button">
+            Home
+            </a>
+            <a href="/check_results"class="btn btn-primary" type="button">
+            Check results!
+            </a>
+        </div>
+        </html>
+        </body>
+        </html>
+        """.format(glob_project_dir_path + "results/")
+        
+        # writing the code into the file
+        f.write(html_template)
+        
+        # close the file
+        f.close()
+   
+        # Create report of object detection, transformation and analysis results.
+        f = open(glob_project_dir_path + "results/report.txt", 'w')
+        
+        # Report message of object detection
+        f.write("Results of object detection: \n")
+        if len(object_detection_errors) != 0:
+            for img in object_detection_errors:
+                line_text = "Detection error: No whiteboard detected on image: {}. \n".format(img)
+                f.write(line_text)
+        else:
+            line_text = "Success: Detected the whiteboard on all images. \n"
             f.write(line_text)
+        
+        # Report message of reference rectangle detection
+        f.write("\n Results of reference rectangle detection: \n")
+        if len(transformation_errors) != 0:
+            for img in transformation_errors:
+                line_text = "Count error: No reference rectangle found on image: {}. \n".format(img)
+                f.write(line_text)
+        else:
+            line_text = "Success: Found at least 1 reference rectangle on all images. \n"
+            f.write(line_text)
+        
+        # Report message of keypoint detection
+        f.write("\n Results of keypoint detection: \n")
+        if len(transformation_warnings) != 0:
+            for img, color in transformation_warnings:
+                line_text = "Count warning: On image: {} the {} reference rectangle was not found. Using the other two for transformation, if possible. \n".format(img, color)
+                f.write(line_text)
+        else:
+            line_text = "Success: The detected number of keypoints on all images are the same as expected (12). \n"
+            f.write(line_text)
+
+        # Report message of pixel analysis
+        f.write("\n Results of pixel analysis: \n")
+        if len(analysis_errors) != 0:
+            for img, param in analysis_errors:
+                line_text = "Value error: The calculated value of {} on image: {} is Nan. \n".format(param, img)
+                f.write(line_text)
+        else:
+            line_text = "Success: The calculated structural parameters are valid numbers."
+            f.write(line_text)
+        f.close()
+        return redirect(url_for('final_2'))
+
+    # Else if the count of annotated points != 12
     else:
-        line_text = "Success: The calculated structural parameters are valid numbers."
-        f.write(line_text)
-    f.close()
-    return redirect(url_for('final_2'))
+        return ('', 204)
 
 # Result checker page for automated detection. Here the user can modify the location of keypoints and re-run the transformation.
 @app.route('/check_results')

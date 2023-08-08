@@ -71,15 +71,6 @@
   max-width: 100%;
   } */
 </style>
-<script>
-	function showDiv() {
-	      console.log("ASD");
-	      document.getElementById('Submit').style.display = "none";
-	      document.getElementById("page").style.display = "none";
-	      document.getElementById('loadingGif').style.display = "block";
-	      document.getElementById('loadingMessage').style.display = "block";
-	}
-</script>
 <div id="loadingGif" style="display:none"><img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"></div>
 <div id="loadingMessage" style="display:none"<label> Object detection, transformation and pixel analysis in progress. This could take 10-12 second per image.</label></div>
 
@@ -564,6 +555,18 @@
    	let complexCoord = coord / coordMax;
     	return complexCoord
     	    }
+	
+   function showDiv() {
+	if (labels.length == 12) { 
+		document.getElementById('Submit').style.display = "none";
+		document.getElementById("page").style.display = "none";
+		document.getElementById('loadingGif').style.display = "block";
+		document.getElementById('loadingMessage').style.display = "block";
+	}
+	else {
+		window.alert("Count error: The count of recorded keypoints is not 12!");
+	}
+   }
 
 </script>
 </body>

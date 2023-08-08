@@ -46,7 +46,7 @@ def skbio_shannon(counts, base):
 # error_images: a list containing the names of images without detectable object
 
 def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5):
-    print("Pixel analysis of image:", file)
+    
     # Define parameters 
     # Create relative paths
     transform_output = project_dir + 'images/transformed_images/' 
@@ -64,6 +64,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
 
     # For every transformed image
     for file in os.listdir(transform_output):
+        print("Pixel analysis of image:", file)
 
         # Load image
         image_full_path = os.path.join(transform_output, file)
@@ -304,7 +305,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
                             else:
                                 veg_str.append([i, j, 0])
                                 orig_image_cut[i, j] = (0,0,0)
-    
+        
         # Analyze vegetation structure
         veg_str_df = pd.DataFrame(veg_str, columns = ['y','x', 'value'])
 

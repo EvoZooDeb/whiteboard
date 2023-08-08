@@ -1268,6 +1268,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             # Add filename to error_report
             error_images.append(file)
             print(file + "Not enough point of reference")
+            continue
     
         # Save results
         print(file, "DONE")
