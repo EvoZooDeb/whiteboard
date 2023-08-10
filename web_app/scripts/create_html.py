@@ -241,7 +241,7 @@ def submit_calibrate():
                 os.remove(os.path.join(edge_detected_dir, f))
         
         # create a HTML page which instructs about the location of the results
-        f = open('templates/final_2.html', 'w')
+        f = open(os.path.join('templates', 'final_2.html'), 'w')
         html_template = """
          <html>
         <body>
@@ -266,7 +266,7 @@ def submit_calibrate():
         f.close()
    
         # Create report of object detection, transformation and analysis results.
-        f = open(glob_project_dir_path + "results/report.txt", 'w')
+        f = open(os.path.join(glob_project_dir_path, "results", "report.txt"), 'w')
         
         # Report message of object detection
         f.write("Results of object detection: \n")
@@ -471,7 +471,7 @@ def submit_check_results():
             os.remove(os.path.join(results_dir, f))
     
     # create a HTML page which instructs about the location of the results
-    f = open('templates/final.html', 'w')
+    f = open(os.path.join('templates', 'final.html'), 'w')
     html_template = """
      <html>
     <body>
@@ -491,7 +491,7 @@ def submit_check_results():
     f.close()
    
     # Create report of transformation and analysis results.
-    f = open(glob_project_dir_path + "results/report_rerun.txt", 'w')
+    f = open(os.path.join(glob_project_dir_path, "results", "report_rerun.txt"), 'w')
     
     # Report message of keypoint detection
     f.write("Results of keypoint detection: \n")
@@ -592,7 +592,7 @@ def submit_csv():
                 os.remove(os.path.join(results_dir, f))
 
         # create a HTML page which instructs about the location of the results
-        f = open('templates/final.html', 'w')
+        f = open(os.path.join('templates', 'final.html'), 'w')
         html_template = """
          <html>
         <body>
@@ -612,7 +612,7 @@ def submit_csv():
         f.close()
         
         # Create report of transformation and analysis results.
-        f = open(glob_project_dir_path + "results/report.txt", 'w')
+        f = open(os.path.join(glob_project_dir_path, "results", "report.txt"), 'w')
 
         # Report message of keypoint counting
         f.write("Results of keypoint counting: \n")
@@ -837,7 +837,7 @@ def submit_annotation():
             os.remove(os.path.join(results_dir, f))
 
     # create a HTML page which instructs about the location of the results
-    f = open('templates/final.html', 'w')
+    f = open(os.path.join('templates' 'final.html'), 'w')
     html_template = """
      <html>
     <body>
@@ -857,7 +857,7 @@ def submit_annotation():
     f.close()
    
     # Create report of transformation and analysis results.
-    f = open(glob_project_dir_path + "results/report.txt", 'w')
+    f = open(os.path.join(glob_project_dir_path, "results", "report.txt"), 'w')
     
     # Report message of keypoint detection
     f.write("Results of keypoint detection: \n")
