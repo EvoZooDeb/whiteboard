@@ -83,7 +83,7 @@ def detect_and_cut(orig_path, project_dir):
     globals()["min_score"]       = 0.6
 
     # The models relative path to project dir
-    model_path                   = project_dir + "model/converted_model_train_9_100.h5"
+    model_path                   = os.path.join(project_dir, "model", "converted_model_train_9_100.h5")
 
     # Load model and label properties
     globals()["model"]           = models.load_model(model_path, backbone_name='resnet50')
@@ -95,10 +95,10 @@ def detect_and_cut(orig_path, project_dir):
     input_path  = orig_path
 
     # Create relative output paths
-    output_path           = project_dir + 'images/box_images/'
-    crop_output           = project_dir + 'images/cropped_images/'    ## output containing crop results ("box images")
-    box_coords_path       = project_dir + 'results/box_coords.csv'    ## your path to the csv file containing box coordinates
-    cut_coords_path       = project_dir + 'results/cut_coords.csv'    ## your path to the csv file containing cut coordinates
+    output_path           = os.path.join(project_dir, 'images', 'box_images')
+    crop_output           = os.path.join(project_dir, 'images','cropped_images')    ## output containing crop results ("box images")
+    box_coords_path       = os.path.join(project_dir, 'results', 'box_coords.csv')    ## your path to the csv file containing box coordinates
+    cut_coords_path       = os.path.join(project_dir, 'results', 'cut_coords.csv')    ## your path to the csv file containing cut coordinates
 
     # H/W ration in case of rotating pictures
     height_to_width_ratio = 0.70

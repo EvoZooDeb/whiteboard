@@ -690,11 +690,11 @@ def corrigate_using_other_rectangles(main_color, color_1 = 0, color_2 = 0):
 def detect_and_transform(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15, average_side_length = 170):
 
     # Define variables
-    crop_output           = project_dir + 'images/cropped_images/'  ## output containing crop results
-    edge_detection_output = project_dir + 'images/edge_detected_images/'
-    transform_output      = project_dir + 'images/transformed_images/'
+    crop_output           = os.path.join(project_dir,'images', 'cropped_images')  ## output containing crop results
+    edge_detection_output = os.path.join(project_dir, 'images', 'edge_detected_images')
+    transform_output      = os.path.join(project_dir, 'images', 'transformed_images')
     original_image_input  = orig_path
-    cut_coord_path        = project_dir + 'results/cut_coords.csv'
+    cut_coord_path        = os.path.join(project_dir, 'results', 'cut_coords.csv')
     globals()["average_side_length"] = average_side_length
     board_height  = float(board_height) # in cm
     board_width   = float(board_width)  # in cm
@@ -1144,7 +1144,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         # If red square has coordinates and safe corners
         if final_coord_r != None and safe_corners_r != [0, 0]:
 
-            # Draw lines at final corner coords - for visualization. Resulst pictures are found in project_dir/images/edge_detected_images/...
+            # Draw lines at final corner coords - for visualization. Results pictures are found in project_dir/images/edge_detected_images/...
             image = cv2.line(image, (round(final_coord_r[0][0]), round(final_coord_r[0][1])), (round(final_coord_r[1][0]), round(final_coord_r[1][1])), (0,255,255), 1)
             image = cv2.line(image, (round(final_coord_r[0][0]), round(final_coord_r[0][1])), (round(final_coord_r[2][0]), round(final_coord_r[2][1])), (0,255,255), 1)
             image = cv2.line(image, (round(final_coord_r[3][0]), round(final_coord_r[3][1])), (round(final_coord_r[2][0]), round(final_coord_r[2][1])), (0,255,255), 1)

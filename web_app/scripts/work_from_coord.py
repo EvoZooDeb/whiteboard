@@ -123,7 +123,7 @@ def work_from_coord(orig_path, coords_path, project_dir, board_height = 105, boa
     # Create paths
     input_path = orig_path
     coords_path = coords_path
-    transform_output   = project_dir + 'images/transformed_images/'
+    transform_output   = os.path.join(project_dir, 'images', 'transformed_images')
 
     # Process board parameters
     board_height  = float(board_height) # in cm

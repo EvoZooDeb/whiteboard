@@ -49,8 +49,8 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     
     # Define parameters 
     # Create relative paths
-    transform_output = project_dir + 'images/transformed_images/' 
-    analyze_output   = project_dir + 'images/result_images/'
+    transform_output = os.path.join(project_dir, 'images', 'transformed_images') 
+    analyze_output   = os.path.join(project_dir, 'images', 'result_images')
     
     # Placeholder lists
     image_names_2 = []
@@ -389,7 +389,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     
     # Save veg_str results to CSV file
     str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhc', 'vor', 'fhd'])
-    str_df.to_csv((project_dir + "results/vegetation_structure_results.csv"), sep = ',', encoding = 'utf-8')
+    str_df.to_csv(os.path.join(project_dir, "results", "vegetation_structure_results.csv"), sep = ',', encoding = 'utf-8')
     return error_images
 
 #pixel_analyse(project_dir, board_height = 105, board_width = 35, rect_l):
