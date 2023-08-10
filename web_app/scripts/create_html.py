@@ -94,6 +94,22 @@ def submit_detect():
         globals()["glob_p_gap_side"]       = p_gap_side
         globals()["glob_save_images"]      = save_images
         app.config["FILES"] = glob_img_list
+        
+        # Create neccessary directories in project_dir
+        if not os.path.exists(project_dir_path + "/images"):
+            os.mkdir(project_dir_path + "/images")
+        if not os.path.exists(project_dir_path + "/images/box_images"):
+            os.mkdir(project_dir_path + "/images/box_images")
+        if not os.path.exists(project_dir_path + "/images/cropped_images"):
+            os.mkdir(project_dir_path + "/images/cropped_images")
+        if not os.path.exists(project_dir_path + "/images/edge_detected_images"):
+            os.mkdir(project_dir_path + "/images/edge_detected_images")
+        if not os.path.exists(project_dir_path + "/images/transformed_images"):
+            os.mkdir(project_dir_path + "/images/transformed_images")
+        if not os.path.exists(project_dir_path + "/images/result_images"):
+            os.mkdir(project_dir_path + "/images/result_images")
+        if not os.path.exists(project_dir_path + "/results"):
+            os.mkdir(project_dir_path + "/results")
 
         # For each picture in image directory place 0 as placeholder to config-data lists.
         for f in glob_img_list:
@@ -546,6 +562,16 @@ def submit_csv():
         globals()["glob_colname_x"]        = colname_x
         globals()["glob_colname_y"]        = colname_y
         globals()["glob_colname_img"]      = colname_img
+        
+        # Create neccessary directories in project_dir
+        if not os.path.exists(project_dir_path + "/images"):
+            os.mkdir(project_dir_path + "/images")
+        if not os.path.exists(project_dir_path + "/images/transformed_images"):
+            os.mkdir(project_dir_path + "/images/transformed_images")
+        if not os.path.exists(project_dir_path + "/images/result_images"):
+            os.mkdir(project_dir_path + "/images/result_images")
+        if not os.path.exists(project_dir_path + "/results"):
+            os.mkdir(project_dir_path + "/results")
 
         # Transformation based on CSV coords
         transformation_errors = work_from_coord.work_from_coord(glob_orig_path, glob_coord_path, glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l, glob_r_gap_top, glob_r_gap_side, glob_b_gap_top, glob_b_gap_side, glob_p_gap_top, glob_p_gap_side, glob_sep, glob_header, glob_colname_x, glob_colname_y, glob_colname_img)
@@ -647,6 +673,16 @@ def submit_annotate():
         globals()["glob_p_gap_side"]       = p_gap_side
         globals()["glob_save_images"]      = save_images
         app.config["FILES"] = glob_img_list
+        
+        # Create neccessary directories in project_dir
+        if not os.path.exists(project_dir_path + "/images"):
+            os.mkdir(project_dir_path + "/images")
+        if not os.path.exists(project_dir_path + "/images/transformed_images"):
+            os.mkdir(project_dir_path + "/images/transformed_images")
+        if not os.path.exists(project_dir_path + "/images/result_images"):
+            os.mkdir(project_dir_path + "/images/result_images")
+        if not os.path.exists(project_dir_path + "/results"):
+            os.mkdir(project_dir_path + "/results")
        
         # For each picture in image directory place 0 as placeholder to config-data lists.
         for f in glob_img_list:
