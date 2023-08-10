@@ -562,6 +562,7 @@ def submit_csv():
         globals()["glob_colname_x"]        = colname_x
         globals()["glob_colname_y"]        = colname_y
         globals()["glob_colname_img"]      = colname_img
+        globals()["glob_save_images"]      = save_images
         
         # Create neccessary directories in project_dir
         if not os.path.exists(project_dir_path + "/images"):
@@ -580,14 +581,14 @@ def submit_csv():
         analysis_errors = veg_analyzer.pixel_analyze(glob_project_dir_path, glob_board_height, glob_board_width, glob_rect_l)
         
         # If save images is on, keep images
-        if save_images == "on":
+        if glob_save_images == "on":
             pass
         # Else delete them
         else:
-            transformation_dir = glob_project_dir_path + "images/transformed_images"
+            transformation_dir = os.path.join(glob_project_dir_path, "images", "transformed_images")
             for f in os.listdir(transformation_dir):
                 os.remove(os.path.join(transformation_dir, f))
-            results_dir = glob_project_dir_path + "images/result_images"
+            results_dir = os.path.join(glob_project_dir_path, "images", "result_images")
             for f in os.listdir(results_dir):
                 os.remove(os.path.join(results_dir, f))
 
