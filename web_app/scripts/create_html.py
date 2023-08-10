@@ -257,7 +257,7 @@ def submit_calibrate():
         </html>
         </body>
         </html>
-        """.format(glob_project_dir_path + "results/")
+        """.format(os.path.join(glob_project_dir_path, "results"))
         
         # writing the code into the file
         f.write(html_template)
@@ -482,7 +482,7 @@ def submit_check_results():
     </html>
     </body>
     </html>
-    """.format(glob_project_dir_path + "results/")
+    """.format(os.path.join(glob_project_dir_path, "results"))
     
     # writing the code into the file
     f.write(html_template)
@@ -603,7 +603,7 @@ def submit_csv():
         </html>
         </body>
         </html>
-        """.format(glob_project_dir_path + "results/")
+        """.format(os.path.join(glob_project_dir_path, "results"))
         
         # writing the code into the file
         f.write(html_template)
@@ -848,7 +848,7 @@ def submit_annotation():
     </html>
     </body>
     </html>
-    """.format(glob_project_dir_path + "results/")
+    """.format(os.path.join(glob_project_dir_path, "results"))
     
     # writing the code into the file
     f.write(html_template)
