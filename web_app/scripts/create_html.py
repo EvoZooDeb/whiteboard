@@ -224,19 +224,19 @@ def submit_calibrate():
             pass
         # Else delete them
         else:
-            transformation_dir = glob_project_dir_path + "images/transformed_images"
+            transformation_dir = os.path.join(glob_project_dir_path, "images", "transformed_images")
             for f in os.listdir(transformation_dir):
                 os.remove(os.path.join(transformation_dir, f))
-            results_dir = glob_project_dir_path + "images/result_images"
+            results_dir = os.path.join(glob_project_dir_path, "images", "result_images")
             for f in os.listdir(results_dir):
                 os.remove(os.path.join(results_dir, f))
-            box_dir = glob_project_dir_path + "images/box_images"
+            box_dir = os.path.join(glob_project_dir_path, "images", "box_images")
             for f in os.listdir(box_dir):
                 os.remove(os.path.join(box_dir, f))
-            cropped_dir = glob_project_dir_path + "images/cropped_images"
+            cropped_dir = os.path.join(glob_project_dir_path, "images", "cropped_images")
             for f in os.listdir(cropped_dir):
                 os.remove(os.path.join(cropped_dir, f))
-            edge_detected_dir = glob_project_dir_path + "images/edge_detected_images"
+            edge_detected_dir = os.path.join(glob_project_dir_path, "images", "edge_detected_images")
             for f in os.listdir(edge_detected_dir):
                 os.remove(os.path.join(edge_detected_dir, f))
         
@@ -463,10 +463,10 @@ def submit_check_results():
         pass
     # Else delete them
     else:
-        transformation_dir = glob_project_dir_path + "images/transformed_images"
+        transformation_dir = os.path.join(glob_project_dir_path, "images", "transformed_images")
         for f in os.listdir(transformation_dir):
             os.remove(os.path.join(transformation_dir, f))
-        results_dir = glob_project_dir_path + "images/result_images"
+        results_dir = os.path.join(glob_project_dir_path, "images", "result_images")
         for f in os.listdir(results_dir):
             os.remove(os.path.join(results_dir, f))
     
@@ -829,10 +829,10 @@ def submit_annotation():
         pass
     # Else delete them
     else:
-        transformation_dir = glob_project_dir_path + "images/transformed_images"
+        transformation_dir = os.path.join(glob_project_dir_path, "images", "transformed_images")
         for f in os.listdir(transformation_dir):
             os.remove(os.path.join(transformation_dir, f))
-        results_dir = glob_project_dir_path + "images/result_images"
+        results_dir = os.path.join(glob_project_dir_path, "images", "result_images")
         for f in os.listdir(results_dir):
             os.remove(os.path.join(results_dir, f))
 
