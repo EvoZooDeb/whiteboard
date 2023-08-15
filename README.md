@@ -20,4 +20,5 @@ Install packages found in git_dir/web_app/requirements_linux.txt using:
 `pip install -r requirements.txt`
 
 Launch application (and keep the terminal running during work):
-`python3 app.py`
+
+`python3 scripts/app.py`
