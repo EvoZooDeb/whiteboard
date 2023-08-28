@@ -714,9 +714,9 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
     warning_images           = []
     config                   = []
     
-    # Red cut_coords from project_dir/results
-    c_coords = pd.read_csv(cut_coord_path, sep = ";", header = None, index_col = 0, squeeze = True).to_dict()
-    
+    # Read cut_coords from project_dir/results
+    c_coords = pd.read_csv(cut_coord_path, sep = ",", index_col = 0)
+
     # For every image in crop_output
     for file in os.listdir(crop_output):
         #file = "PA042208.JPG"
@@ -730,9 +730,11 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         orig_image               = cv2.imread(original_image_full_path)
         
         # Filter cut_coords points by image_name
-        globals()["cc"]          = c_coords[file].split(',')
-        globals()["cc"][0]       = cc[0][1:]
-        globals()["cc"][2]       = cc[2][:-1]
+        fc_coords  = c_coords[c_coords['img'] == file]
+        globals()["cc"]          = []
+        cc.append(fc_coords['top_y'].iloc[0])
+        cc.append(fc_coords['top_left_x'].iloc[0])
+        cc.append(fc_coords['top_right_x'].iloc[0])
 
         # Define placeholder variables
         globals()["R"]             = False
@@ -1282,6 +1284,6 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
 
 #(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15):
 if __name__ == '__main__':
-    detect_and_transform("/home/eram/python_venv/images/original_images/", "/home/eram/python_venv/")
+    detect_and_transform("/home/eram/python_venv/images/original_test/", "/home/eram/python_venv/")
 
 

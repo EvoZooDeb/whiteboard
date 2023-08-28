@@ -10,6 +10,7 @@ import time
 import tensorflow as tf
 import math
 import csv
+import pandas as pd
 
 ### Detection on images
 ## Description:
@@ -83,6 +84,7 @@ def detect_and_cut(orig_path, project_dir):
     globals()["min_score"]       = 0.6
 
     # The models relative path to project dir
+    #model_path                   = os.path.join("model", "converted_model_train_9_100.h5")
     model_path                   = os.path.join(project_dir, "model", "converted_model_train_9_100.h5")
 
     # Load model and label properties
@@ -97,16 +99,15 @@ def detect_and_cut(orig_path, project_dir):
     # Create relative output paths
     output_path           = os.path.join(project_dir, 'images', 'box_images')
     crop_output           = os.path.join(project_dir, 'images','cropped_images')    ## output containing crop results ("box images")
-    box_coords_path       = os.path.join(project_dir, 'results', 'box_coords.csv')    ## your path to the csv file containing box coordinates
+    #box_coords_path       = os.path.join(project_dir, 'results', 'box_coords.csv')    ## your path to the csv file containing box coordinates
     cut_coords_path       = os.path.join(project_dir, 'results', 'cut_coords.csv')    ## your path to the csv file containing cut coordinates
 
     # H/W ration in case of rotating pictures
     height_to_width_ratio = 0.70
 
     # Placeholder lists
-    image_names           = []
+    coords_data           = []
     error_images          = []
-    coords                = []
 
     # RUN DETECTION ON ALL IMAGES IN THE INPUT FOLDER
     for file in os.listdir(input_path):
@@ -119,8 +120,8 @@ def detect_and_cut(orig_path, project_dir):
         detection_on_image(input_full_path,output_full_path, error_images, image_name = file)
 
     print("Box detection results saved to:" + output_path)
-    np.savetxt(box_coords_path, new_boxes, delimiter=',')  ### SAVE COORDS TO CSV
-    print("Box coordinates saved to:", box_coords_path)
+    #np.savetxt(box_coords_path, new_boxes, delimiter=',')  ### SAVE COORDS TO CSV
+    #print("Box coordinates saved to:", box_coords_path)
 
 ### CUT OUT THE TABLES ACCORDING TO THE BOX COORDINATES
     # For each image in input_path
@@ -150,34 +151,33 @@ def detect_and_cut(orig_path, project_dir):
                 if first_row > w / 2:
                     cropped_image = image[first_col:last_col, first_row:last_row]
                     cropped_image = cv2.rotate(cropped_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                    coords.append([image.shape[1] - last_row, first_col, last_col])
+                    coords_data.append([file[1], image.shape[1] - last_row, first_col, last_col])
                 else:
                     cropped_image = image[first_col:last_col, last_row:first_row]
                     cropped_image = cv2.rotate(cropped_image, cv2.ROTATE_90_CLOCKWISE)
-                    coords.append([image.shape[1] - first_row, first_col, last_col])
+                    coords_data.append([file[1], image.shape[1] - first_row, first_col, last_col])
     
             else:
                 # Crop image based on box coordinates
                 cropped_image = image[first_col:last_col, first_row:last_row]
 
                 # Append cut coordinates to list
-                coords.append([first_col, first_row, last_row])
-
-            image_names.append(file[1])
+                coords_data.append([file[1], first_col, first_row, last_row])
 
             # Save "box image" to the relative output path
             crop_output_full_path = os.path.join(crop_output, file[1])
             cv2.imwrite(crop_output_full_path, cropped_image)
     
     # Save cut coordinates with the corresponding image name to a CSV file
-    coords_dict = {}
+    coords_df = pd.DataFrame(coords_data, columns =['img', 'top_y', 'top_left_x', 'top_right_x'])
+    coords_df.to_csv(cut_coords_path, sep = ',', encoding = 'utf-8')
     
-    for i in range(0,len(image_names),1):
-        coords_dict[image_names[i]] = coords[i]
-    
-    with open(cut_coords_path, 'w') as f_1:
-        for key in coords_dict.keys():
-            f_1.write("%s;%s\n"%(key,coords_dict[key]))
+    #for i in range(0,len(image_names),1):
+    #    coords_dict[image_names[i]] = coords[i]
+    #
+    #with open(cut_coords_path, 'w') as f_1:
+    #    for key in coords_dict.keys():
+    #        f_1.write("%s;%s\n"%(key,coords_dict[key]))
     
     print("Image cropping results saved to:" + crop_output)
     print("Cut coordinates saved to:", cut_coords_path)
