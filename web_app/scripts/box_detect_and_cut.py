@@ -30,13 +30,13 @@ def detection_on_image(image_full_path,output_full_path, error_images, image_nam
         # If box found with high enough confidence
     elif results[0].boxes.conf > min_score:
         r = results[0] 
-            print("Confidence_score:", r.boxes.conf)
-            # Get box coords
-            box_coords = [int(x) for x in r.boxes.xyxy[0].tolist()]
-            new_boxes.append(box_coords)
-            im_array = r.plot()  # plot a BGR numpy array of predictions
-            im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-            im.save(output_full_path)  # save image
+        print("Confidence_score:", r.boxes.conf)
+        # Get box coords
+        box_coords = [int(x) for x in r.boxes.xyxy[0].tolist()]
+        new_boxes.append(box_coords)
+        im_array = r.plot()  # plot a BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+        im.save(output_full_path)  # save image
 
 ### Detection and cut
 ## Description:
