@@ -1,6 +1,4 @@
-keras
-keras-retinanet
-tensorflow
+ultralytics==8.1.15
 pandas==1.4.4
 Flask==2.3.2
 

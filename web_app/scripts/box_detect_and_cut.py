@@ -1,14 +1,8 @@
-import keras
-from keras_retinanet import models
-from keras_retinanet.utils.image import read_image_bgr, preprocess_image, resize_image
-from keras_retinanet.utils.visualization import draw_box, draw_caption
-from keras_retinanet.utils.colors import label_color
+from ultralytics import YOLO
+from PIL import Image
 import cv2
 import os
 import numpy as np
-import time
-import tensorflow as tf
-import math
 import csv
 import pandas as pd
 
@@ -22,49 +16,27 @@ import pandas as pd
 # error_images: a list containing the names of images without detectable object
 # image_name: name of the image file
 
-def detection_on_image(image_path,output_full_path, error_images, image_name):
-        print("DETECTING ON IMAGE:", image_name)
-        # Load and preprocess image
-        image                 = cv2.imread(image_path)
-        draw                  = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image                 = preprocess_image(image)
-
-        # Get parameters
-        h, w                  = image.shape[:2]
-        image, scale          = resize_image(image)
-
+def detection_on_image(image_full_path,output_full_path, error_images, image_name):
+    print("DETECTING ON IMAGE:", image_name)
         # Run model prediction
-        boxes, scores, labels = model.predict_on_batch(np.expand_dims(image, axis=0))
+        results = model(image_full_path)
 
-        # Select prediction with best score
-        max_score             = scores.max()
-        boxes /= scale
-
-        # If no score sufficent:
-        if np.all(scores[0] < min_score):
-            print(image_name, ": NO BOX")
-            error_images.append(image_name)
+    # If no object found
+        if len(results) == 0:
+            print(file, ": NO BOX")
+            outlier_images.append(file)
             new_boxes.append(np.array([0,0,0,0]))
-        else:    
-           # Select the best box
-           for box, score, label in zip(boxes[0], scores[0], labels[0]):
-                if score < max_score:
-                    break
-                if score < min_score:
-                    break
-                
-                print("Confidence_score:", score)
-                print("Label:", labels_to_names[label])
-                
-                # Draw box
-                color   = label_color(label)
-                b       = box.astype(int)
-                draw_box(draw, b, color=color)
-                caption = "{} {:.3f}".format(labels_to_names[label], score)
-                draw_caption(draw, b, caption)
-                new_boxes.append(b.copy())
-                detected_img = cv2.cvtColor(draw, cv2.COLOR_RGB2BGR)
-                cv2.imwrite(output_full_path, detected_img)
+
+        # If box found with high enough confidence
+    elif results[0].boxes.conf > min_score:
+        r = results[0] 
+            print("Confidence_score:", r.boxes.conf)
+            # Get box coords
+            box_coords = [int(x) for x in r.boxes.xyxy[0].tolist()]
+            new_boxes.append(box_coords)
+            im_array = r.plot()  # plot a BGR numpy array of predictions
+            im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+            im.save(output_full_path)  # save image
 
 ### Detection and cut
 ## Description:
@@ -85,15 +57,13 @@ def detect_and_cut(orig_path, project_dir):
 
     # The models relative path to project dir
     #model_path                   = os.path.join("model", "converted_model_train_9_100.h5")
-    model_path                   = os.path.join(project_dir, "model", "converted_model_train_9_100.h5")
+    model_path                   = os.path.join(project_dir, "model", "classic.pt")
 
     # Load model and label properties
-    globals()["model"]           = models.load_model(model_path, backbone_name='resnet50')
-    globals()["labels_to_names"] = {0:'whiteboard'}                    ##  labels and its index val
+    globals()["model"]           = YOLO(model_path)
     
     # Placeholder for box parameters
     globals()["new_boxes"]       = []
-
     input_path  = orig_path
 
     # Create relative output paths
