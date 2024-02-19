@@ -1276,7 +1276,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         print(file, "DONE")
         edge_detection_full_output = os.path.join(edge_detection_output, file)
         cv2.imwrite(edge_detection_full_output, image)
-        transform_full_output = os.path.join(transform_output, ("new_" + file))
+        transform_full_output = os.path.join(transform_output, ("AD_" + file))
         cv2.imwrite(transform_full_output, orig_image)
     print("Edge detection results saved to:" + edge_detection_output)
     print("Perspective transformation results saved to:" + transform_output)

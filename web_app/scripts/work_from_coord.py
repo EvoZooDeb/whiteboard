@@ -190,7 +190,7 @@ def work_from_coord(orig_path, coords_path, project_dir, board_height = 105, boa
             orig_image_cut = cv2.warpPerspective(image, M, table_shape)
             
             # Save image 
-            crop_template_full_output = os.path.join(transform_output, file)
+            crop_template_full_output = os.path.join(transform_output, ("CD_" + file))
             cv2.imwrite(crop_template_full_output, orig_image_cut)
             print(file, "DONE!")
     return error_images
