@@ -18,14 +18,14 @@ import pandas as pd
 
 def detection_on_image(image_full_path,output_full_path, error_images, image_name):
     print("DETECTING ON IMAGE:", image_name)
-        # Run model prediction
-        results = model(image_full_path)
+    # Run model prediction
+    results = model(image_full_path)
 
     # If no object found
-        if len(results) == 0:
-            print(file, ": NO BOX")
-            outlier_images.append(file)
-            new_boxes.append(np.array([0,0,0,0]))
+    if len(results) == 0:
+        print(file, ": NO BOX")
+        outlier_images.append(file)
+        new_boxes.append(np.array([0,0,0,0]))
 
         # If box found with high enough confidence
     elif results[0].boxes.conf > min_score:
