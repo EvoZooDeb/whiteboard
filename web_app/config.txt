@@ -1,4 +1,4 @@
-relative_model_path="../model/classic.pt"
+model_name=classic.pt
 board_height=105
 board_width=35
 square_side_length=5

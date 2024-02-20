@@ -31,7 +31,7 @@ for line in Lines:
     globals()["config_" + line.split("=")[0]] = line.split("=")[1]
 
 # By default it creates:
-# config_relative_model_path
+# config_model_name
 # config_board_height
 # config_board_width
 # config_square_side_length
@@ -233,7 +233,7 @@ def submit_calibrate():
         average_side_length = detect_and_transform.calc_average_side_length(old_points)
         
         # Object detection
-        object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path)
+        object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path, config_model_name)
         #object_detection_errors = []
         
         # Keypoint detection and transformation

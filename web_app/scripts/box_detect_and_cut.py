@@ -45,11 +45,12 @@ def detection_on_image(image_full_path,output_full_path, error_images, image_nam
 ## Parameters:
 # orig_path: full path  of input images (directory + filename)
 # project_dir: project directory path, read documentation at https://github.com/EvoZooDeb/whiteboard. 
+# model_name: Name of the model inside 'project_dir/model' as a string. Can be modified in 'project_dir/config.txt'.
 
 ## Returns:
 # error_images: a list containing the names of images without detectable object
 
-def detect_and_cut(orig_path, project_dir):
+def detect_and_cut(orig_path, project_dir, model_name):
     # Define parameters:
 
     # Minimum confidence score of object detection
@@ -57,7 +58,8 @@ def detect_and_cut(orig_path, project_dir):
 
     # The models relative path to project dir
     #model_path                   = os.path.join("model", "converted_model_train_9_100.h5")
-    model_path                   = os.path.join(project_dir, "model", "classic.pt")
+    #model_path                   = os.path.join(project_dir, ("model/" + model_name))
+    model_path                   = project_dir + "model/" + model_name
 
     # Load model and label properties
     globals()["model"]           = YOLO(model_path)
