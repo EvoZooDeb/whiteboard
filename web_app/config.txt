@@ -1,0 +1,16 @@
+relative_model_path="../model/classic.pt"
+board_height=105
+board_width=35
+square_side_length=5
+r_top_gap=0
+r_side_gap=2
+b_top_gap=0
+b_side_gap=2
+p_top_gap=15
+p_side_gap=15
+save_images=checked
+separator=,
+header=0
+colname_x=X
+colname_y=Y
+colname_img=Label

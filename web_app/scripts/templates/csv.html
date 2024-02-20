@@ -35,63 +35,63 @@ function showDiv() {
     </label>
     <label>
       Board height:
-      <p><input type="text" name="Board_height" id="Board_height" value = 105 required ></p>
+      <p><input type="text" name="Board_height" id="Board_height" value = {{config_board_height}} required ></p>
     </label>
     <label>
       Board width:
-      <p><input type="text" name="Board_width" id="Board_width" value = 35 required ></p>
+      <p><input type="text" name="Board_width" id="Board_width" value = {{config_board_width}} required ></p>
     </label>
     <label>
       Square side length:
-      <p><input type="text" name="Rect_l" id="Rect_l" value = 5 required ></p>
+      <p><input type="text" name="Rect_l" id="Rect_l" value = {{config_square_side_length}} required ></p>
     </label>
     <label>
       R Top gap:
-      <p><input type="text" name="r_gap_top" id="r_gap_top" value = 0 required ></p>
+      <p><input type="text" name="r_gap_top" id="r_gap_top" value = {{config_r_top_gap}} required ></p>
     </label>
     <label>
       R Side gap:
-      <p><input type="text" name="r_gap_side" id="r_gap_side" value = 2 required ></p>
+      <p><input type="text" name="r_gap_side" id="r_gap_side" value = {{config_r_side_gap}} required ></p>
     </label>
     <label>
       B Top gap:
-      <p><input type="text" name="b_gap_top" id="b_gap_top" value = 0 required ></p>
+      <p><input type="text" name="b_gap_top" id="b_gap_top" value = {{config_b_top_gap}} required ></p>
     </label>
     <label>
       B Side gap:
-      <p><input type="text" name="b_gap_side" id="b_gap_side" value = 2 required ></p>
+      <p><input type="text" name="b_gap_side" id="b_gap_side" value = {{config_b_side_gap}} required ></p>
     </label>
     <label>
       P Top gap:
-      <p><input type="text" name="p_gap_top" id="p_gap_top" value = 15 required ></p>
+      <p><input type="text" name="p_gap_top" id="p_gap_top" value = {{config_p_top_gap}} required ></p>
     </label>
     <label>
       P Side gap:
-      <p><input type="text" name="p_gap_side" id="p_gap_side" value = 15 required ></p>
+      <p><input type="text" name="p_gap_side" id="p_gap_side" value = {{config_p_side_gap}} required ></p>
     </label>
     <label>
       Separator:
-      <p><input type="text" name="Separator" id="Separator" value = , required ></p>
+      <p><input type="text" name="Separator" id="Separator" value = {{config_separator}} required ></p>
     </label>
     <label>
       Header:
-      <p><input type="text" name="Header" id="Header" value = 0 required ></p>
+      <p><input type="text" name="Header" id="Header" value = {{config_header}} required ></p>
     </label>
     <label>
       Colname X:
-      <p><input type="text" name="Colname_x" id="Colname_x" value = X required ></p>
+      <p><input type="text" name="Colname_x" id="Colname_x" value = {{config_colname_x}} required ></p>
     </label>
     <label>
       Colname Y:
-      <p><input type="text" name="Colname_y" id="Colname_y" value = Y required ></p>
+      <p><input type="text" name="Colname_y" id="Colname_y" value = {{config_colname_y}} required ></p>
     </label>
     <label>
       Colname IMG:
-      <p><input type="text" name="Colname_img" id="Colname_img" value = Label required ></p>
+      <p><input type="text" name="Colname_img" id="Colname_img" value = {{config_colname_img}} required ></p>
     </label>
     <label>
       Save images:
-      <p><input type="checkbox" name="Save_images" id="Save_images"></p>
+      <p><input type="checkbox" name="Save_images" id="Save_images" {{config_save_images}}></p>
     </label>
     <p><input type=submit value=Run_transformation id="Submit"></p>
   </form>
