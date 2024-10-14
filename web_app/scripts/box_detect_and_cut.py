@@ -102,7 +102,6 @@ def detect_and_cut(orig_path, project_dir):
         # Call detection_on_image function on each image
         detection_on_image(input_full_path,output_full_path, error_images, image_name = file)
     
-    print(len(new_boxes))
     print("Box detection results saved to:" + output_path)
     #np.savetxt(box_coords_path, new_boxes, delimiter=',')  ### SAVE COORDS TO CSV
     #print("Box coordinates saved to:", box_coords_path)
