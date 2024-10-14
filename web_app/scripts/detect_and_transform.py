@@ -708,6 +708,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
     p_gap_top     = float(p_gap_top) * 10  # in cm
     p_gap_side    = float(p_gap_side) * 10 # in cm
     table_shape   = [round(new_w), round(new_h)]
+    average_side_length = round(average_side_length)
     
     # Define empty lists
     error_images             = []
