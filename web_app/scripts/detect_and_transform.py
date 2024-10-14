@@ -708,7 +708,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
     p_gap_top     = float(p_gap_top) * 10  # in cm
     p_gap_side    = float(p_gap_side) * 10 # in cm
     table_shape   = [round(new_w), round(new_h)]
-    average_side_length = round(average_side_length)
+    rd_average_side_length = round(average_side_length)
     
     # Define empty lists
     error_images             = []
@@ -756,7 +756,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
                 R_val = None
                 break
             for i in range(w, l, -int(m)):
-                sample             = shade_image[average_side_length : average_side_length + l, i- l: i]
+                sample             = shade_image[rd_average_side_length : rd_average_side_length + l, i- l: i]
                 sample_h, sample_w = sample.shape[:2]
                 R_val = 255
                 G_val = 255
