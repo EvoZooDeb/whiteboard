@@ -65,7 +65,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
     # For every transformed image
     for file in os.listdir(transform_output):
         print("Pixel analysis of image:", file)
-
+        #file = "DSC_5684.JPG"
         # Load image
         image_full_path = os.path.join(transform_output, file)
         orig_image_cut = cv2.imread(image_full_path)
@@ -74,7 +74,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         shortening_cm = round(rect_l + 1)
         narrowing_cm  = round(rect_l / 2)
         orig_image_cut = orig_image_cut[shortening_cm*10:,narrowing_cm*10:-narrowing_cm*10]
-        
+        copy_image = orig_image_cut.copy() 
     
         # Calculate average white shade
         # Define variables
@@ -173,7 +173,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
                                         #orig_image_cut[i, j] = (255,0,255)
                                 else:
                                     veg_str.append([i, j, 0])
-                                    orig_image_cut[i, j] = (0,0,0)
+                                    orig_image_cut[i, j] = (0,0,0) # HERE
                                     white_pixel = white_pixel + 1
                             else:
                                 veg_str.append([i, j, 1])
@@ -183,29 +183,41 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
                             orig_image_cut[i, j] = (0,0,0)
                             white_pixel = white_pixel + 1
                     # Reference rectangle
-                    elif (orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10) or (orig_image_cut[i][j][0] < 100 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] and orig_image_cut[i][j][2]+10 > orig_image_cut[i][j][1]):
+                    # Central reference rectangle
+                    # Deep purple
+                    elif (120 < j < 190 and 80 < i < 150) and ((orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10) or (orig_image_cut[i][j][0] < 100 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] and orig_image_cut[i][j][2]+10 > orig_image_cut[i][j][1])):
                    # elif orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10:
                         veg_str.append([i, j, 0])
+                        orig_image_cut[i, j] = (0,0,0)
+                        white_pixel = white_pixel + 1
+                    
+                    # Light purple
+                    elif (120 < j < 190 and 80 < i < 150) and ((orig_image_cut[i][j][2] > 125 and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 40 and orig_image_cut[i][j][2] > orig_image_cut[i][j][0] + 10) or (orig_image_cut[i][j][2] < 100 and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 5 and orig_image_cut[i][j][2] > orig_image_cut[i][j][0] + 5 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 3) or (orig_image_cut[i][j][0] + 12 >= orig_image_cut[i][j][2] and orig_image_cut[i][j][2] + 12 >= orig_image_cut[i][j][0] and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30)):
+                        veg_str.append([i, j, 0])
+                        #print("BLUE", orig_image_cut[i][j][0])
+                        #print("GREEN", orig_image_cut[i][j][1])
+                        #print("RED", orig_image_cut[i][j][2])
+                        #print("BREAK-------")
                         orig_image_cut[i, j] = (0,0,0)
                         white_pixel = white_pixel + 1
                     
                     elif R_up_lim > orig_image_cut[i][j][0] > R_low_lim and G_up_lim > orig_image_cut[i][j][1] > G_low_lim and B_up_lim > orig_image_cut[i][j][2] > B_low_lim:
                         if int(orig_image_cut[i][j][1]) - int(orig_image_cut[i][j][0]) > 5:
                             if int(orig_image_cut[i][j][1]) - int(orig_image_cut[i][j][0]) < int(G_val) - int(B_val) + 30:
-                                veg_str.append([i, j, 0])
-                                orig_image_cut[i, j] = (0, 0, 0)
-                                white_pixel = white_pixel + 1
-                            else:
                                 veg_str.append([i, j, 1])
-                                #orig_image_cut[i, j] = (255,0,255)
+                           #     orig_image_cut[i, j] = (255, 0, 255) # PURPLE
+                            #    white_pixel = white_pixel + 1
+                            #else:
+                            #    veg_str.append([i, j, 1])
+                            #    #orig_image_cut[i, j] = (255,0,255)
                         else:
                             veg_str.append([i, j, 0])
-                            orig_image_cut[i, j] = (0,0,0)
+                            orig_image_cut[i, j] = (0, 0, 0)
                             white_pixel = white_pixel + 1
                     elif orig_image_cut[i][j][0] < orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][1] < orig_image_cut[i][j][0] +30 and orig_image_cut[i][j][0] < orig_image_cut[i][j][2] + 30 and orig_image_cut[i][j][2] < orig_image_cut[i][j][0] + 30 and orig_image_cut[i][j][2] < orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][1] < orig_image_cut[i][j][2] + 30 and orig_image_cut[i][j][0] > 70 and orig_image_cut[i][j][1] > 70 and orig_image_cut[i][j][2] > 70:
-                            veg_str.append([i, j, 0])
-                            orig_image_cut[i, j] = (0,0,0)
-                            white_pixel = white_pixel + 1
+                            veg_str.append([i, j, 1])
+                            #orig_image_cut[i, j] = (0, 255, 255) # YELLOW
+                            #white_pixel = white_pixel + 1
                     else:
                         veg_str.append([i, j, 1])
                         #orig_image_cut[i, j] = (255,0,0)
@@ -267,13 +279,20 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
                                             veg_str.append([i, j, 0])
                                             orig_image_cut[i, j] = (0,0,0)
                                             white_pixel = white_pixel + 1
-                                    # Reference rectangle
-                                    elif (orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10) or (orig_image_cut[i][j][0] < 100 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] and orig_image_cut[i][j][2]+10 > orig_image_cut[i][j][1]):
-                           #         elif orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10:
+                                    
+                                    # Central reference rectangle
+                                    # Deep purple
+                                    elif (120 < j < 190 and 80 < i < 150) and ((orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] + 10) or (orig_image_cut[i][j][0] < 100 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] and orig_image_cut[i][j][0] > orig_image_cut[i][j][2] and orig_image_cut[i][j][2]+10 > orig_image_cut[i][j][1])):
                                         veg_str.append([i, j, 0])
                                         orig_image_cut[i, j] = (0,0,0)
                                         white_pixel = white_pixel + 1
                                     
+                                    # Light purple
+                                    elif (120 < j < 190 and 80 < i < 150) and ((orig_image_cut[i][j][2] > 150 and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 40 and orig_image_cut[i][j][2] > orig_image_cut[i][j][0] + 10) or (orig_image_cut[i][j][2] < 100 and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 5 and orig_image_cut[i][j][2] > orig_image_cut[i][j][0] + 5 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 3) or (orig_image_cut[i][j][0] + 12 >= orig_image_cut[i][j][2] and orig_image_cut[i][j][2] + 12 >= orig_image_cut[i][j][0] and orig_image_cut[i][j][2] > orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][0] > orig_image_cut[i][j][1] + 30)):
+                                        veg_str.append([i, j, 0])
+                                        orig_image_cut[i, j] = (0,0,0) 
+                                        white_pixel = white_pixel + 1
+
                                     elif R_up_lim > orig_image_cut[i][j][0] > R_low_lim and G_up_lim > orig_image_cut[i][j][1] > G_low_lim and B_up_lim > orig_image_cut[i][j][2] > B_low_lim:
                                         if int(orig_image_cut[i][j][1]) - int(orig_image_cut[i][j][0]) > 5:
                                             if int(orig_image_cut[i][j][1]) - int(orig_image_cut[i][j][0]) < int(G_val) - int(B_val) + 30:
@@ -282,18 +301,18 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
                                                 white_pixel = white_pixel + 1
                                             else:
                                                 veg_str.append([i, j, 1])
-                                               # orig_image_cut[i, j] = (0,0,255)
+                                                #orig_image_cut[i, j] = (0,0,255)
                                         else:
                                             veg_str.append([i, j, 0])
                                             orig_image_cut[i, j] = (0,0,0)
                                             white_pixel = white_pixel + 1
                                     elif orig_image_cut[i][j][0] < orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][1] < orig_image_cut[i][j][0] +30 and orig_image_cut[i][j][0] < orig_image_cut[i][j][2] + 30 and orig_image_cut[i][j][2] < orig_image_cut[i][j][0] + 30 and orig_image_cut[i][j][2] < orig_image_cut[i][j][1] + 30 and orig_image_cut[i][j][1] < orig_image_cut[i][j][2] + 30 and orig_image_cut[i][j][0] > 70 and orig_image_cut[i][j][1] > 70 and orig_image_cut[i][j][2] > 70:
-                                        veg_str.append([i, j, 0])
-                                        orig_image_cut[i, j] = (0,0,0)
+                                        veg_str.append([i, j, 1])
+                                        #orig_image_cut[i, j] = (0,255,255)
                                         white_pixel = white_pixel + 1
                                     else:
                                         veg_str.append([i, j, 1])
-                                       # orig_image_cut[i, j] = (0,0,255)
+                                        #orig_image_cut[i, j] = (0,0,255)
                                     if j == max_x_max-1:
                                         if white_pixel >= (max_x_max - min_x_max)-5:
                                             white_rows = white_rows + 1
@@ -385,7 +404,8 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
 
         # Save resulting image: black pixels indicate table pixels, vegetation pixels remain unchanged
         analyze_full_output = os.path.join(analyze_output, file)
-        cv2.imwrite(analyze_full_output, orig_image_cut)
+        res_stack = np.hstack((copy_image, orig_image_cut))
+        cv2.imwrite(analyze_full_output, res_stack)
     
     # Save veg_str results to CSV file
     str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhc', 'vor', 'fhd'])
@@ -394,5 +414,5 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
 
 #pixel_analyse(project_dir, board_height = 105, board_width = 35, rect_l):
 if __name__ == '__main__':
-    pixel_analyze("/home/eram/python_venv/")
+    pixel_analyze("/home/golah/whiteboard_project/webapp_test/whiteboard/web_app/")
 

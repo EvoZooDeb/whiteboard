@@ -719,7 +719,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
 
     # For every image in crop_output
     for file in os.listdir(crop_output):
-        #file = "PA042208.JPG"
+        #file = "DSC_5188.JPG"
         
         # Load images 
         image_full_path          = os.path.join(crop_output, file)
@@ -755,7 +755,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
                 R_val = None
                 break
             for i in range(w, l, -int(m)):
-                sample             = shade_image[0 : l, i- l: i]
+                sample             = shade_image[average_side_length : average_side_length + l, i- l: i]
                 sample_h, sample_w = sample.shape[:2]
                 R_val = 255
                 G_val = 255
@@ -778,9 +778,12 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
                     average_R = sum(sample_R) / len(sample_R)
                     average_G = sum(sample_G) / len(sample_G)
                     average_B = sum(sample_B) / len(sample_B)
-
+                    #print(average_R)
+                    #print(average_G)
+                    #print(average_B)
                     # Substract average values from the theoretical white value (255). If all of the results are below the threshold (160) it may indicate a white                        (or greyish in reality) shade.
-                    if 255 - average_R  < 160 and 255 - average_G < 160 and 255 - average_B < 160 and average_G < average_R + 25 and average_G < average_B + 35 :
+                    if 255 - average_R  < 160 and 255 - average_G < 160 and 255 - average_B < 160 and average_G < average_R + 25 and average_G < average_B + 35: #-- edited on 2024.07.09
+                    #if 255 - average_R  < 160 and 255 - average_G < 160 and 255 - average_B < 160 and average_G < average_R + 25 and average_G < average_B + 35 and ((average_B < average_R + 40 and average_B >= 160) or (average_B < 160 and average_B + 25 > average_R)) and ((average_R < average_B + 40 and average_R >= 160) or (average_R < 160 and average_R + 25 > average_B)):
                         
                         # If there is little (< 25) difference between the lowest and highest values in each color channel, it may indicate that the sample picture co                        ntains similar pixels, depicting a uniform object. 
                         if max(sample_R) - min(sample_R) < 25 and max(sample_G) - min(sample_G) < 25  and max(sample_B) - min( sample_B) < 25:
@@ -791,6 +794,9 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             
             # We found the sufficient values
             if R_val == average_R and G_val == average_G and B_val == average_B:
+                #cv2.imshow("Top_detected", sample)
+                #cv2.waitKey(0)
+                #cv2.destroyAllWindows()
                 break
             
             # Crop out another sample rectangle, next to the previous one with m overlap.
@@ -1276,7 +1282,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
         print(file, "DONE")
         edge_detection_full_output = os.path.join(edge_detection_output, file)
         cv2.imwrite(edge_detection_full_output, image)
-        transform_full_output = os.path.join(transform_output, ("AD_" + file))
+        transform_full_output = os.path.join(transform_output, ("new_" + file))
         cv2.imwrite(transform_full_output, orig_image)
     print("Edge detection results saved to:" + edge_detection_output)
     print("Perspective transformation results saved to:" + transform_output)
@@ -1284,6 +1290,6 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
 
 #(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15):
 if __name__ == '__main__':
-    detect_and_transform("/home/eram/python_venv/images/original_test/", "/home/eram/python_venv/")
+    detect_and_transform("/home/banm/mfs/fehertabla_2024_tavasz/", "/home/golah//whiteboard_project/webapp_test/whiteboard/web_app/", average_side_length = 93)
 
 

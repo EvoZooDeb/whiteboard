@@ -20,14 +20,24 @@ def detection_on_image(image_full_path,output_full_path, error_images, image_nam
     print("DETECTING ON IMAGE:", image_name)
     # Run model prediction
     results = model(image_full_path)
-
     # If no object found
-    if len(results) == 0:
-        print(file, ": NO BOX")
-        outlier_images.append(file)
+    if len(results[0].boxes.xywh) == 0:
+        #print(image_name, ": NO BOX")
+        error_images.append(image_name)
         new_boxes.append(np.array([0,0,0,0]))
-
-        # If box found with high enough confidence
+   
+   # If multiple object found choose the best one only
+    elif len(results[0].boxes.xywh) > 1:
+        r = results[0][0] 
+        print("Confidence_score:", r.boxes.conf)
+        # Get box coords
+        box_coords = [int(x) for x in r.boxes.xyxy[0].tolist()]
+        new_boxes.append(box_coords)
+        im_array = r.plot()  # plot a BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+        im.save(output_full_path)  # save image
+        
+    # If box found with high enough confidence
     elif results[0].boxes.conf > min_score:
         r = results[0] 
         print("Confidence_score:", r.boxes.conf)
@@ -37,6 +47,10 @@ def detection_on_image(image_full_path,output_full_path, error_images, image_nam
         im_array = r.plot()  # plot a BGR numpy array of predictions
         im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
         im.save(output_full_path)  # save image
+    else:
+        print("Low confidence score ", image_name)
+        error_images.append(image_name)
+        new_boxes.append(np.array([0,0,0,0]))
 
 ### Detection and cut
 ## Description:
@@ -45,21 +59,19 @@ def detection_on_image(image_full_path,output_full_path, error_images, image_nam
 ## Parameters:
 # orig_path: full path  of input images (directory + filename)
 # project_dir: project directory path, read documentation at https://github.com/EvoZooDeb/whiteboard. 
-# model_name: Name of the model inside 'project_dir/model' as a string. Can be modified in 'project_dir/config.txt'.
 
 ## Returns:
 # error_images: a list containing the names of images without detectable object
 
-def detect_and_cut(orig_path, project_dir, model_name):
+def detect_and_cut(orig_path, project_dir):
     # Define parameters:
 
     # Minimum confidence score of object detection
-    globals()["min_score"]       = 0.6
+    globals()["min_score"]       = 0.5
 
     # The models relative path to project dir
     #model_path                   = os.path.join("model", "converted_model_train_9_100.h5")
-    #model_path                   = os.path.join(project_dir, ("model/" + model_name))
-    model_path                   = project_dir + "model/" + model_name
+    model_path                   = os.path.join(project_dir, "model", "classic.pt")
 
     # Load model and label properties
     globals()["model"]           = YOLO(model_path)
@@ -83,22 +95,22 @@ def detect_and_cut(orig_path, project_dir, model_name):
 
     # RUN DETECTION ON ALL IMAGES IN THE INPUT FOLDER
     for file in os.listdir(input_path):
-        
         # Define for paths
         input_full_path  = os.path.join(input_path,file)
         output_full_path = os.path.join(output_path,file)
 
         # Call detection_on_image function on each image
         detection_on_image(input_full_path,output_full_path, error_images, image_name = file)
-
+    
+    print(len(new_boxes))
     print("Box detection results saved to:" + output_path)
     #np.savetxt(box_coords_path, new_boxes, delimiter=',')  ### SAVE COORDS TO CSV
     #print("Box coordinates saved to:", box_coords_path)
 
 ### CUT OUT THE TABLES ACCORDING TO THE BOX COORDINATES
     # For each image in input_path
-    for file in enumerate(os.listdir(input_path)):
-            print("Cropping the images...")
+    for file in enumerate(os.listdir(input_path)):    
+            print("Cropping: ", file)
 
             # Load image
             output_full_path = os.path.join(input_path, file[1])
@@ -156,4 +168,4 @@ def detect_and_cut(orig_path, project_dir, model_name):
     return error_images
 
 if __name__ == '__main__':
-    detect_and_cut("/home/eram/python_venv/images/original_images/", "/home/eram/python_venv/")
+    detect_and_cut("/home/banm/mfs/fehertabla_2024_tavasz/", "/home/golah//whiteboard_project/webapp_test/whiteboard/web_app/")

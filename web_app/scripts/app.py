@@ -21,33 +21,6 @@ globals()["id_seq"] = []
 globals()["global_config_data"] = [] 
 globals()["global_seq_id_data"] = []
 
-# Process config file
-# Using readlines()
-file1 = open('../config.txt', 'r')
-Lines = file1.readlines()
- 
-# Create config variables
-for line in Lines:
-    globals()["config_" + line.split("=")[0]] = line.split("=")[1]
-
-# By default it creates:
-# config_model_name
-# config_board_height
-# config_board_width
-# config_square_side_length
-# config_r_top_gap
-# config_r_side_gap
-# config_b_top_gap
-# config_b_side_gap
-# config_p_top_gap
-# config_p_side_gap
-# config_save_images
-# config_separator
-# config_header
-# config_colname_x
-# config_colname_y
-# config_colname_img
-
 app = Flask(__name__)
 
 # Method picker, allows the user to choose either work from coord or use automated detection+transformation.
@@ -89,7 +62,7 @@ def submit_load():
 # Parameter supply page for automated detection method
 @app.route('/detect/')
 def detect():
-    return render_template('detect.html', config_board_height = config_board_height, config_board_width = config_board_width, config_square_side_length = config_square_side_length, config_r_top_gap = config_r_top_gap, config_r_side_gap = config_r_side_gap, config_b_top_gap = config_b_top_gap, config_b_side_gap = config_b_side_gap,config_p_top_gap = config_p_top_gap, config_p_side_gap= config_p_side_gap, config_save_images = config_save_images)
+    return render_template('detect.html')
 
 @app.route('/detect/', methods = ["POST"])
 def submit_detect():
@@ -233,7 +206,7 @@ def submit_calibrate():
         average_side_length = detect_and_transform.calc_average_side_length(old_points)
         
         # Object detection
-        object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path, config_model_name)
+        object_detection_errors = box_detect_and_cut.detect_and_cut(glob_orig_path, glob_project_dir_path)
         #object_detection_errors = []
         
         # Keypoint detection and transformation
@@ -546,7 +519,7 @@ def submit_check_results():
 # Parameter supply page for load from csv method.
 @app.route('/csv/')
 def csv():
-    return render_template('csv.html', config_board_height = config_board_height, config_board_width = config_board_width, config_square_side_length = config_square_side_length, config_r_top_gap = config_r_top_gap, config_r_side_gap = config_r_side_gap, config_b_top_gap = config_b_top_gap, config_b_side_gap = config_b_side_gap,config_p_top_gap = config_p_top_gap, config_p_side_gap= config_p_side_gap, config_save_images = config_save_images, config_separator = config_separator,config_header = config_header, config_colname_x = config_colname_x,config_colname_y = config_colname_y, config_colname_img = config_colname_img)
+    return render_template('csv.html')
 
 @app.route('/csv/', methods = ["POST"])
 def submit_csv():
@@ -667,7 +640,7 @@ def submit_csv():
 # Parameter supply page for annotation in site method
 @app.route('/annotate/')
 def annotate():
-    return render_template('annotate.html', config_board_height = config_board_height, config_board_width = config_board_width, config_square_side_length = config_square_side_length, config_r_top_gap = config_r_top_gap, config_r_side_gap = config_r_side_gap, config_b_top_gap = config_b_top_gap, config_b_side_gap = config_b_side_gap,config_p_top_gap = config_p_top_gap, config_p_side_gap= config_p_side_gap, config_save_images = config_save_images)
+    return render_template('annotate.html')
 
 @app.route('/annotate/', methods = ["POST"])
 def submit_annotate():
