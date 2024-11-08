@@ -751,6 +751,8 @@ def next():
         #annotated_points.append([label["id"],label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
         globals()["annotated_points"].append([label["name"],round(float(label["x_coord"])), round(float(label["y_coord"]))])
         globals()["label_count"] = globals()["label_count"] + 1
+        annotated_points_dataframe_csv = pd.DataFrame(annotated_points, columns = ['name','x_coord', 'y_coord'])
+        annotated_points_dataframe_csv.to_csv(os.path.join(glob_project_dir_path, "results", "manual_coords.csv"))
 
     # If the next image has any points recorded in the global config data load them. If not, open the plain image.
     if global_config_data[app.config["HEAD"]] == 0:
