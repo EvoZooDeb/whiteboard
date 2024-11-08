@@ -720,7 +720,7 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
 
     # For every image in crop_output
     for file in os.listdir(crop_output):
-        #file = "DSC_5188.JPG"
+        #file = "DSC_2815.JPG"
         
         # Load images 
         image_full_path          = os.path.join(crop_output, file)
@@ -755,7 +755,11 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             if k+l > h:
                 R_val = None
                 break
+
             for i in range(w, l, -int(m)):
+                if rd_average_side_length + l > shade_image.shape[0]:
+                    R_val = None
+                    break
                 sample             = shade_image[rd_average_side_length : rd_average_side_length + l, i- l: i]
                 sample_h, sample_w = sample.shape[:2]
                 R_val = 255
@@ -795,15 +799,15 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
             
             # We found the sufficient values
             if R_val == average_R and G_val == average_G and B_val == average_B:
-                #cv2.imshow("Top_detected", sample)
-                #cv2.waitKey(0)
-                #cv2.destroyAllWindows()
                 break
             
             # Crop out another sample rectangle, next to the previous one with m overlap.
             else:
                 shade_image = shade_image[int(m):, : ]
-    
+        
+        if R_val == None:
+            print("No average shade found")
+            continue
     # Preprocessing    
     # Lighten dark picures
         if (R_val + G_val + B_val) / 3 < 180 and 175 > R_val > 100 and 175 > G_val > 100 and 175 > B_val > 100: 
@@ -1291,6 +1295,6 @@ def detect_and_transform(orig_path, project_dir, board_height = 105, board_width
 
 #(orig_path, project_dir, board_height = 105, board_width = 35, rect_l = 5, r_gap_top = 0, r_gap_side = 2, b_gap_top = 0, b_gap_side = 2, p_gap_top = 15, p_gap_side = 15):
 if __name__ == '__main__':
-    detect_and_transform("/home/banm/mfs/fehertabla_2024_tavasz/", "/home/golah//whiteboard_project/webapp_test/whiteboard/web_app/", average_side_length = 93)
+    detect_and_transform("/home/eram/Geri/work/whiteboard/edvard_2024_elemzes/2024_aut/original_images/", "/home/eram/Geri/work/whiteboard/edvard_2024_elemzes/2024_aut/", average_side_length = 93)
 
 
