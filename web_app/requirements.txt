@@ -1,4 +1,7 @@
 ultralytics==8.1.15
 pandas==1.4.4
 Flask==2.3.2
-
+torch==2.5.1 
+torchvision==0.20.1 
+torchaudio==2.5.1
+numpy==1.23
