@@ -130,7 +130,9 @@ height="4.729861111111111in"}
 ### 2. Automated detection
 
 ![](media/image2.png){width="6.6930555555555555in"
-height="4.729861111111111in"}**Flowchart explanation: **
+height="4.729861111111111in"}
+
+**Flowchart explanation:**
 
 Yellow elements indicate directories, blue elements indicate files, gray
 elements scripts, orange element indicates parameters gained from user
@@ -181,8 +183,6 @@ red lines indicate outputs, black lines indicate parental relationship.
 -   from\_crd.py = work\_from\_coord.py
 
 See **app** **parameters and results below.**
-
-  {#section-4 .ListParagraph}
 
 How to use
 ==========
@@ -534,8 +534,6 @@ Original image directory should contain the original images, and nothing
 else!
 
 Only use images of the same resolution at a time!
-
-  {#section-7 .ListParagraph}
 
 Citations
 =========
