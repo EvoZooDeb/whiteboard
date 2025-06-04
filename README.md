@@ -70,7 +70,7 @@ at:
 [[https://www.python.org/downloads/windows/]](https://www.python.org/downloads/windows/)\
 (only if didn't install with Python: pip (tested on 22.0.4), see more
 at:
-[[https://phoenixnap.com/kb/install-pip-windows]{.underline}](https://phoenixnap.com/kb/install-pip-windows)
+[[https://phoenixnap.com/kb/install-pip-windows]](https://phoenixnap.com/kb/install-pip-windows)
 )
 
 Git:
