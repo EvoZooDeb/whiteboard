@@ -435,10 +435,10 @@ Additional parameters
 ---------------------
 
 -   **Separator**: separator of CSV file. Read more at:
-    [[https://pandas.pydata.org/docs/reference/api/pandas.read\_csv.html]{.underline}](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
+    [[https://pandas.pydata.org/docs/reference/api/pandas.read\_csv.html]](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
 
 -   **Header**: header option for read\_csv. Read more at:
-    [[https://pandas.pydata.org/docs/reference/api/pandas.read\_csv.html]{.underline}](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
+    [[https://pandas.pydata.org/docs/reference/api/pandas.read\_csv.html]](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
 
 -   **Colname X**: name of the column containing X coordinates.
 
@@ -547,4 +547,4 @@ Our paper:
 Inspiration:
 
 Point recorder inspired by:
-[[https://github.com/techytushar/flask-image-annotator]{.underline}](https://github.com/techytushar/flask-image-annotator)
+[[https://github.com/techytushar/flask-image-annotator]](https://github.com/techytushar/flask-image-annotator)
