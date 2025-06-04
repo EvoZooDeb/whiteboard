@@ -129,7 +129,7 @@ height="4.729861111111111in"}
 
 ### 2. Automated detection
 
-![](media/image2.png){width="6.6930555555555555in"
+![]([media/image2.png](https://github.com/EvoZooDeb/whiteboard/blob/main/workflow_detect_and_transform.jpg)){width="6.6930555555555555in"
 height="4.729861111111111in"}
 
 **Flowchart explanation:**
