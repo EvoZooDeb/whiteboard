@@ -118,7 +118,7 @@ cases using the following workflows:
 
 ### 1. Work with manual coordinates
 
-![alt text]([http://url/to/img.png](https://github.com/EvoZooDeb/whiteboard/blob/main/workflow_work_from_coord.jpg)
+![Image](https://github.com/user-attachments/assets/71528393-43b3-4f35-98b8-2e4f19efb7f8)
 
 ### 
 
