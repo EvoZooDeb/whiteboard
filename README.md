@@ -365,8 +365,6 @@ it using the modified coordinates.
 -   Remove points by 'Ctrl + click' or by using the '-' button on the
     side menu.
 
-  {#section-5 .ListParagraph}
-
 List of parameters to supply
 ============================
 
