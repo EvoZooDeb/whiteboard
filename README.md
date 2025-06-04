@@ -30,16 +30,16 @@ Linux
 Prerequisites:
 
 Python\>=3.8 (tested on 3.8.11, 3.8.17), see more at:
-[[https://docs.python-guide.org/starting/install3/linux/]{.underline}](https://docs.python-guide.org/starting/install3/linux/)
+[[https://docs.python-guide.org/starting/install3/linux/]](https://docs.python-guide.org/starting/install3/linux/)
 )
 
 Git:
-[[https://git-scm.com/downloads]{.underline}](https://git-scm.com/downloads)
+[[https://git-scm.com/downloads]](https://git-scm.com/downloads)
 
 1\. Clone the repository using:
 
 git clone
-[[https://github.com/EvoZooDeb/whiteboard]{.underline}](https://github.com/EvoZooDeb/whiteboard)
+[[https://github.com/EvoZooDeb/whiteboard]](https://github.com/EvoZooDeb/whiteboard)
 
 2\. Create python virtual environment using:
 
@@ -67,19 +67,19 @@ Prerequisites:
 
 Python\>=3.8\* (tested on 3.10.4 we recommend this version), see more
 at:
-[[https://www.python.org/downloads/windows/]{.underline}](https://www.python.org/downloads/windows/)\
+[[https://www.python.org/downloads/windows/]](https://www.python.org/downloads/windows/)\
 (only if didn't install with Python: pip (tested on 22.0.4), see more
 at:
 [[https://phoenixnap.com/kb/install-pip-windows]{.underline}](https://phoenixnap.com/kb/install-pip-windows)
 )
 
 Git:
-[[https://git-scm.com/downloads]{.underline}](https://git-scm.com/downloads)
+[[https://git-scm.com/downloads]](https://git-scm.com/downloads)
 
 1\. Clone the repository using (in git-cmd):
 
 git clone
-[[https://github.com/EvoZooDeb/whiteboard]{.underline}](https://github.com/EvoZooDeb/whiteboard)
+[[https://github.com/EvoZooDeb/whiteboard]](https://github.com/EvoZooDeb/whiteboard)
 
 2\. Create python virtual environment using:
 
