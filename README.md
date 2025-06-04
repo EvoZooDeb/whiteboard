@@ -118,7 +118,7 @@ cases using the following workflows:
 
 ### 1. Work with manual coordinates
 
-![Image](https://github.com/user-attachments/assets/71528393-43b3-4f35-98b8-2e4f19efb7f8)
+![Image](https://github.com/user-attachments/assets/8af366f7-8efe-4b42-a348-4a653c6439d7)
 
 ### 
 
@@ -128,8 +128,7 @@ cases using the following workflows:
 
 ### 2. Automated detection
 
-![]([(https://github.com/EvoZooDeb/whiteboard/blob/main/workflow_detect_and_transform.jpg](https://github.com/EvoZooDeb/whiteboard/blob/main/workflow_detect_and_transform.jpg)){width="6.6930555555555555in"
-height="4.729861111111111in"}
+![Image](https://github.com/user-attachments/assets/46d94332-8604-468c-89fc-c0178a19961b)
 
 **Flowchart explanation:**
 
@@ -410,8 +409,7 @@ Board parameters
 
 ### **Illustrating board parameters**
 
-![](media/image3.png){width="6.6930555555555555in"
-height="9.469444444444445in"}
+![Image](https://github.com/user-attachments/assets/71528393-43b3-4f35-98b8-2e4f19efb7f8)
 
 ### How to create your own board
 
