@@ -19,8 +19,6 @@ This documentation page contains all the basic information users need to
 install and use the web application, including an installation guide,
 rules of thumb.
 
-  {#section .ListParagraph}
-
 Install
 =======
 
@@ -39,7 +37,7 @@ Git:
 1\. Clone the repository using:
 
 git clone
-[[https://github.com/EvoZooDeb/whiteboard]](https://github.com/EvoZooDeb/whiteboard)
+[https://github.com/EvoZooDeb/whiteboard](https://github.com/EvoZooDeb/whiteboard)
 
 2\. Create python virtual environment using:
 
@@ -79,7 +77,7 @@ Git:
 1\. Clone the repository using (in git-cmd):
 
 git clone
-[[https://github.com/EvoZooDeb/whiteboard]](https://github.com/EvoZooDeb/whiteboard)
+[https://github.com/EvoZooDeb/whiteboard](https://github.com/EvoZooDeb/whiteboard)
 
 2\. Create python virtual environment using:
 
