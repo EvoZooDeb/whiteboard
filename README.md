@@ -12,7 +12,7 @@ Read more about the concept at: **link to paper/manuscript - DOI**
 
 To allow users to pick their preferred way of structure analysis, and to
 freely parameterize the functions with ease, we have developed a
-(\[Flask\]([[https://flask.palletsprojects.com/en/2.3.x/]{.underline}](https://flask.palletsprojects.com/en/2.3.x/))
+(\[Flask\]([[https://flask.palletsprojects.com/en/2.3.x/]](https://flask.palletsprojects.com/en/2.3.x/))
 based) web application.
 
 This documentation page contains all the basic information users need to
