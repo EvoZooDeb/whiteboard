@@ -4,7 +4,7 @@ Description
 We have developed a reproducible, semi-automated, photography-based
 method that provides reliable results for the structural parameters of
 vegetation (leaf area - LA, height of closed vegetation - HCV, maximum
-canopy height - MHC, foliage height diversity -- FHD), utilizing the
+height of vegetation - MHV, foliage height diversity -- FHD), utilizing the
 power of **digital image processing** and **machine learning** based
 **object detection** tools.
 
@@ -167,7 +167,7 @@ red lines indicate outputs, black lines indicate parental relationship.
 
 -   results = Results images directory: Automatically generated
     directory, that contains the pixel-analyzed board images. Black
-    pixels are classified as 'board'. Pink vertical line indicates MHC,
+    pixels are classified as 'board'. Pink vertical line indicates MHV,
     red vertical line indicates HCV.
 
 **Scripts:**
@@ -511,7 +511,7 @@ structural parameters of each image. Has the following columns:
 
 -   hcv: Calculated height of closed vegetation in cm.
 
--   mhc: Calculated maximum vegetation height in cm.
+-   mhv: Calculated maximum vegetation height in cm.
 
 -   vor: Calculated visual obstruction reading value in cm.
 
