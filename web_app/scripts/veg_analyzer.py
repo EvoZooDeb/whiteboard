@@ -364,12 +364,12 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
             error_images.append([file, "height of closed vegetation (hcv)"])
         print("HCV:", hcv)
 
-        # MHC: The maximum Y value
+        # MHV: The maximum Y value
         mhc = vor_df['y'][vor_df['value'] > 0].max()
         if math.isnan(mhc):
             mhc = 'NA'
-            error_images.append([file, "maximum height of vegetation (mhc)"])
-        print("MHC:", mhc)
+            error_images.append([file, "maximum height of vegetation (mhv)"])
+        print("MHV:", mhc)
 
         # VOR
         if mhc != 'NA' and hcv != 'NA':
@@ -398,7 +398,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
             if math.isnan(mhc_pix):
                 mhc_pix = h
             orig_image_cut  = cv2.line(orig_image_cut,(0, int(hcv_pix)), (int(w), int(hcv_pix)), (0, 0, 255) ,3) # HCV
-            orig_image_cut  = cv2.line(orig_image_cut,(0, int(mhc_pix)), (int(w), int(mhc_pix)), (255, 0, 255), 3) # MHC
+            orig_image_cut  = cv2.line(orig_image_cut,(0, int(mhc_pix)), (int(w), int(mhc_pix)), (255, 0, 255), 3) # MHV
     
         print(file, "DONE!")
 
@@ -408,7 +408,7 @@ def pixel_analyze(project_dir, board_height = 105, board_width = 35, rect_l = 5)
         cv2.imwrite(analyze_full_output, res_stack)
     
     # Save veg_str results to CSV file
-    str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhc', 'vor', 'fhd'])
+    str_df = pd.DataFrame(str_data, columns = ['img', 'la','coverage_percent', 'hcv', 'mhv', 'vor', 'fhd'])
     str_df.to_csv(os.path.join(project_dir, "results", "vegetation_structure_results.csv"), sep = ',', encoding = 'utf-8')
     return error_images
 
